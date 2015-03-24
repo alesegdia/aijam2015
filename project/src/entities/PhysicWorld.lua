@@ -45,11 +45,22 @@ PhysicWorld = Class {
   end,
 
   createSphereBody = function( self, x, y, radius, mass, static )
-	return self:createBody_( x, y, love.physics.newCircleShape( radius * self.m2pix ), mass, static )
+	return self:createBody_( 0, 0, love.physics.newCircleShape( radius ), mass, static )
   end,
 
   createRectangleBody = function( self, x, y, w, h, mass, static )
-  	return self:createBody_( x, y, love.physics.newRectangleShape( w * self.m2pix, h * self.m2pix ), mass, static )
+  	return self:createBody_( x, y, love.physics.newRectangleShape( w, h ), mass, static )
+  end,
+
+  createPlayer = function( self, x, y )
+	local phb = love.physics.newBody( self.w, x, y, "dynamic" )
+	phb:setMass(10)
+	local s = love.physics.newCircleShape(-2,-33,10)
+	local f = love.physics.newFixture( phb, s )
+	s = love.physics.newCircleShape(-2,-13,10)
+	f = love.physics.newFixture( phb, s )
+
+	return phb
   end
 
 }

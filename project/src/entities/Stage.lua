@@ -2,7 +2,7 @@
 -- Stage Class
 --
 -- 2014 Heachant, Tilmann Hars <headchant@headchant.com>
---
+-- Modified by alesegdia.
 --
 
 --------------------------------------------------------------------------------
@@ -30,7 +30,6 @@ Stage = Class{
 			if v then
 				v:update(dt)
 				if v.dead then
-					print "destrayin"
 					v.physicbody:destroy()
 					if v.remove then
 					  v:remove()

@@ -25,6 +25,7 @@ Entity = Class{
 		self = Thing.init(self, x, y)
 		stage:register(self)
 		self.stage = stage
+		self.dead = false
 		return self
 	end
 }
