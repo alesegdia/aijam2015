@@ -12,7 +12,7 @@ Hero = Class {
 	anim:addFrame(0,0,44,88,1)
 	local phb = world:createPlayer(x, y)
   	self = GameEntity.init( self, stage, x, y, anim, phb )
-  	self.shootRate = 0.1
+  	self.shootRate = 0.5
   	self.nextShoot = love.timer.getTime() + self.shootRate
   	self.entitytype = "hero"
   	self.health = 20
@@ -48,6 +48,18 @@ Hero = Class {
 		dx = -1
 	end
 
+	local vx, vy = self.physicbody:getLinearVelocity()
+	local final = Vector(vx + dx * 30, vy + dy * 30)
+	final:trim_inplace(300)
+	if dx == 0 then
+		final.x = final.x * 0.9
+	end
+	if dy == 0 then
+		final.y = final.y * 0.9
+	end
+	self.physicbody:setLinearVelocity(final.x, final.y)
+	self.physicbody:setAngle(0)
+
 	if self.input.shoot and love.timer.getTime() > self.nextShoot then
 		self.nextShoot = love.timer.getTime() + self.shootRate
 		local x,y = love.mouse.getPosition()
@@ -57,14 +69,21 @@ Hero = Class {
 		self:shoot(vec.x * speed, vec.y * speed)
 	end
 
-	self.physicbody:setLinearVelocity(dx*300, dy*300)
-	self.physicbody:setAngle(0)
 	GameEntity.update(self,dt)
   end,
   shoot = function(self, vx, vy)
-  	  local finalpos = self.pos + Vector(0,0)
-	Bullet(self.stage, finalpos.x, finalpos.y, vx, vy)
+  	  self.physicbody:applyForce(-vx*100, -vy*100)
+  	  self.stage.physicworld:raycastShotgun(self.pos, Vector(-vx,-vy), 30, 5,
+	  function(ent)
+		  ent.health = ent.health - 5
+		  if ent.health <= 0 then ent.dead = true end
+	  end)
+	  --[[
+	  local finalpos = self.pos + Vector(0,0)
+	  Bullet(self.stage, finalpos.x, finalpos.y, vx, vy)
+	  --]]
   end
+
 }
 
 Hero:include(GameEntity)

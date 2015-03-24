@@ -2,12 +2,55 @@
 
 local Class         = require (LIBRARYPATH.."hump.class"	)
 
+
+local RC_nearest = function( rh )
+  return function( fixture, x, y, xn, yn, fraction )
+  	local userdata = fixture:getBody():getUserData()
+  	if userdata.entitytype ~= "zombie" then
+  		return -1
+  	end
+	rh.fix = fixture
+	rh.x, rh.y, rh.xn, rh.yn = x, y, xn, yn
+	return fraction
+  end
+end
+
+local RC_nearest2 = function( rh )
+  return function( fixture, x, y, xn, yn, fraction )
+  	local userdata = fixture:getUserData()
+  	if userdata.collayer ~= map_layer then return -1 end
+	rh.x, rh.y, rh.xn, rh.yn = x, y, xn, yn
+	return fraction
+  end
+end
+
 PhysicWorld = Class {
 
   init = function(self, gravx, gravy, m2pix)
 	self.w = love.physics.newWorld( gravx, gravy, true )
 	love.physics.setMeter( m2pix )
 	self.m2pix = m2pix
+  end,
+
+  raycastShotgun = function( self, origin, dir, coneAngle, numRays, handler )
+  	  local anglestep = coneAngle / numRays
+  	  for i=-coneAngle/2,coneAngle/2,anglestep do
+  	  	  local rh = self:raycast( origin, dir, i )
+  	  	  if rh.fix ~= nil then
+  	  	  	  print("yay")
+  	  	  	  handler(rh.fix:getBody():getUserData())
+		  end
+	  end
+  end,
+
+  raycast = function(self, base, dir, angle )
+	  angle = angle or 0
+	  local v = dir:rotated(angle)
+	  local rayhit = { x=0,y=0,xn=0,yn=0,fix=nil }
+	  --print("vx: " .. angle) -- base.x)
+	  --print("vy: " .. base.y)
+	  self.w:rayCast(base.x, base.y, base.x+v.x*2000,base.y+v.y*2000,RC_nearest(rayhit))
+	  return rayhit
   end,
 
   createBody_ = function( self, x, y, shape, mass, static )
@@ -56,10 +99,13 @@ PhysicWorld = Class {
 	  local phb = love.physics.newBody( self.w, x, y, "dynamic" )
 	  local s = love.physics.newCircleShape(-2,-33,10)
 	  local f = love.physics.newFixture( phb, s, 0 )
+	  f:setFriction(0)
 	  s = love.physics.newCircleShape(-2,-13,10)
 	  f = love.physics.newFixture( phb, s, 0 )
+	  f:setFriction(0)
 	  s = love.physics.newRectangleShape(-2,-20,20,18)
 	  f = love.physics.newFixture( phb, s, 0)
+	  f:setFriction(0)
 	  return phb
   end,
 
