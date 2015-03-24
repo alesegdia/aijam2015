@@ -50,7 +50,7 @@ local cam = camera.new(0,0,1,0)
 
 local directController = function(zombie)
 	local v2p = hero.pos - zombie.pos
-	local speed = 300
+	local speed = 150
 	if v2p:len() > 60 then
 		v2p:normalize_inplace()
 		zombie.physicbody:setLinearVelocity(v2p.x * speed, v2p.y * speed)
@@ -60,6 +60,8 @@ local directController = function(zombie)
 end
 
 local spawnZombie = function(x,y)
+	x = x + love.math.random() * 300
+	y = y + love.math.random() * 300
 	local z = Zombie(stage, x, y, directController)
 end
 
@@ -69,7 +71,9 @@ function Game:enter()
   end
   local anim = newAnimation(Image.map8x, 1600, 1280, 1, 1)
   GameEntity(stage,0,0,anim,nil)
-  spawnZombie(50,50)
+  for i=1,10 do
+	spawnZombie(50,50)
+	end
   hero = Hero(stage,10,50,world)
   anim:addFrame(0,0,1600,1280,1)
 end
