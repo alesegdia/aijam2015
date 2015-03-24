@@ -12,7 +12,7 @@ GameEntity = Class {
 		if self.physicbody ~= nil then
 			self.physicbody:setUserData(self)
 		end
-		self.debug = true
+		self.debug = false
 		return self
 	end,
 	update = function(self,dt)

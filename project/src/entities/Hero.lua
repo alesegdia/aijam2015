@@ -16,7 +16,9 @@ Hero = Class {
   	self.nextShoot = love.timer.getTime() + self.shootRate
   	self.entitytype = "hero"
   	self.health = 20
+  	self.deltaboing = Vector(0,0)
 	phb:setUserData(self)
+	self.lastBoingFinished = true
   	return self
   end,
   input = {
@@ -48,6 +50,15 @@ Hero = Class {
 		dx = -1
 	end
 
+	if dx ~= 0 or dy ~= 0 then
+		if self.lastBoingFinished then
+			self.lastBoingFinished = false
+			self.boingtween = timer.tween(0.1, self.deltaboing, { y = -10 }, 'out-quad', function()
+				timer.tween(0.1, self.deltaboing, { y = 0 }, 'quad', function() self.lastBoingFinished = true end)
+			end)
+		end
+	end
+
 	local vx, vy = self.physicbody:getLinearVelocity()
 	local final = Vector(vx + dx * 30, vy + dy * 30)
 	final:trim_inplace(300)
@@ -70,15 +81,17 @@ Hero = Class {
 	end
 
 	GameEntity.update(self,dt)
+	self.pos.x = self.pos.x + self.deltaboing.x
+	self.pos.y = self.pos.y + self.deltaboing.y
   end,
   shoot = function(self, vx, vy)
-  	  self.physicbody:applyForce(-vx*100, -vy*100)
+  	  --self.physicbody:applyForce(-vx*100, -vy*100)
   	  self.stage.physicworld:raycastShotgun(self.pos, Vector(-vx,-vy), 30, 5,
 	  function(ent)
 		  ent.health = ent.health - 5
 		  if ent.health <= 0 then ent.dead = true end
 	  end)
-	  --[[
+  	  --[[
 	  local finalpos = self.pos + Vector(0,0)
 	  Bullet(self.stage, finalpos.x, finalpos.y, vx, vy)
 	  --]]

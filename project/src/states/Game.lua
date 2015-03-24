@@ -5,7 +5,7 @@
 local Gamestate     = require (LIBRARYPATH.."hump.gamestate")
 local gui       = require( LIBRARYPATH.."Quickie"           )
 local camera = require (LIBRARYPATH.."hump.camera")
-local timer = require (LIBRARYPATH.."hump.timer")
+timer = require (LIBRARYPATH.."hump.timer")
 local tween         = timer.tween
 
 require "src.entities.Stage"
@@ -112,7 +112,7 @@ function Game:enter()
 	hero = Hero(stage,map.size.w/2 * 128,map.size.h/2 * 128,world)
 	anim:addFrame(0,0,1600,1280,1)
 	buildMap()
-	for i=1,100 do
+	for i=1,0 do
 		spawnZombie(hero.pos.x+50,hero.pos.y+50)
 	end
 end
@@ -120,7 +120,8 @@ end
 function Game:update( dt )
 	timer.update(dt)
 	stage:update(dt)
-	cam:lookAt(hero.pos.x, hero.pos.y)
+	local x,y = hero.physicbody:getPosition()
+	cam:lookAt(x,y)
 	if gui.Button{text = "Go back"} then
 		timer.clear()
 		Gamestate.switch(Menu)
@@ -153,7 +154,6 @@ function Game:draw()
   love.graphics.setColor({255,0,0,255})
   love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 50)
   love.graphics.setColor({255,255,255,255})
-  GameEntity.update(hero, 0)
   cam:draw( function()
 	local tilesize = 128
 	  love.graphics.setColor(0x9b,0xad,0xb7,255)
