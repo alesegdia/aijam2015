@@ -1,5 +1,6 @@
 
 local Class         = require (LIBRARYPATH.."hump.class"	)
+local Vector        = require (LIBRARYPATH.."hump.vector"	)
 
 require "src.entities.GameEntity"
 require "src.entities.Bullet"
@@ -11,9 +12,11 @@ Hero = Class {
 	anim:addFrame(0,0,44,88,1)
 	local phb = world:createPlayer(x, y)
   	self = GameEntity.init( self, stage, x, y, anim, phb )
+  	self.shootRate = 0.1
+  	self.nextShoot = love.timer.getTime() + self.shootRate
   	return self
   end,
-  keyinput = {
+  input = {
 	up = false,
 	down = false,
 	left = false,
@@ -22,29 +25,34 @@ Hero = Class {
   },
   update = function(self,dt)
 
-	self.keyinput.up = love.keyboard.isDown("w")
-	self.keyinput.down = love.keyboard.isDown("s")
-	self.keyinput.left = love.keyboard.isDown("a")
-	self.keyinput.right = love.keyboard.isDown("d")
-	self.keyinput.shoot = love.keyboard.isDown("r")
+	self.input.up = love.keyboard.isDown("w")
+	self.input.down = love.keyboard.isDown("s")
+	self.input.left = love.keyboard.isDown("a")
+	self.input.right = love.keyboard.isDown("d")
 
 	local dx, dy
 	dx = 0
 	dy = 0
-	if self.keyinput.up then
+	if self.input.up then
 		dy = -1
-	elseif self.keyinput.down then
+	elseif self.input.down then
 		dy = 1
 	end
 
-	if self.keyinput.right then
+	if self.input.right then
 		dx = 1
-	elseif self.keyinput.left then
+	elseif self.input.left then
 		dx = -1
 	end
 
-	if self.keyinput.shoot then
-		self:shoot(100, 0)
+	if self.input.shoot and love.timer.getTime() > self.nextShoot then
+		self.nextShoot = love.timer.getTime() + self.shootRate
+		local x,y = love.mouse.getPosition()
+		local vec = Vector(x-1024/2,y-768/2)
+		print(vec)
+		vec:normalize_inplace()
+		local speed = 1000
+		self:shoot(vec.x * speed, vec.y * speed)
 	end
 
 	self.physicbody:setLinearVelocity(dx*300, dy*300)
@@ -52,7 +60,8 @@ Hero = Class {
 	GameEntity.update(self,dt)
   end,
   shoot = function(self, vx, vy)
-	Bullet(self.stage, self.pos.x, self.pos.y, vx, vy)
+  	  local finalpos = self.pos + Vector(0,0)
+	Bullet(self.stage, finalpos.x, finalpos.y, vx, vy)
   end
 }
 

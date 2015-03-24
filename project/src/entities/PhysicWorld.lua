@@ -53,15 +53,40 @@ PhysicWorld = Class {
   end,
 
   createPlayer = function( self, x, y )
-	local phb = love.physics.newBody( self.w, x, y, "dynamic" )
-	phb:setMass(10)
-	local s = love.physics.newCircleShape(-2,-33,10)
-	local f = love.physics.newFixture( phb, s )
-	s = love.physics.newCircleShape(-2,-13,10)
-	f = love.physics.newFixture( phb, s )
+	  local phb = love.physics.newBody( self.w, x, y, "dynamic" )
+	  phb:setMass(10)
+	  local s = love.physics.newCircleShape(-2,-33,10)
+	  s:computeMass(1)
+	  local f = love.physics.newFixture( phb, s )
+	  s = love.physics.newCircleShape(-2,-13,10)
+	  s:computeMass(1)
+	  f = love.physics.newFixture( phb, s )
+	  return phb
+  end,
 
-	return phb
+  createZombie = function( self, x, y )
+	  local phb = love.physics.newBody( self.w, x, y, "dynamic" )
+	  phb:setMass(10)
+	  local s = love.physics.newCircleShape(0,-10,10)
+	  s:computeMass(1)
+	  local f = love.physics.newFixture( phb, s )
+	  s = love.physics.newCircleShape(0,10,10)
+	  s:computeMass(1)
+	  f = love.physics.newFixture( phb, s )
+	  return phb
+  end,
+
+  createBullet = function( self, x, y )
+	  local phb = love.physics.newBody( self.w, x, y, "dynamic" )
+	  phb:setMass(1)
+	  local s = love.physics.newRectangleShape(8, 4)
+	  local f = love.physics.newFixture( phb, s )
+	  phb:setBullet(true)
+	  f:setSensor(true)
+	  return phb
   end
+
+
 
 }
 
