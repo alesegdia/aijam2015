@@ -12,6 +12,9 @@ Zombie = Class {
 	local phb = stage.physicworld:createZombie(x, y)
   	self = GameEntity.init( self, stage, x, y, anim, phb )
   	self.controller = controller or function(self) print("im dumb heh") end
+  	self.entitytype = "zombie"
+  	self.health = 10
+  	phb:setUserData(self)
   	return self
   end,
   update = function(self,dt)

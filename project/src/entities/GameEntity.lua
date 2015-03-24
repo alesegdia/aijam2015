@@ -8,13 +8,15 @@ GameEntity = Class {
 	init = function(self, stage, x, y, anim, phbody)
 		print(stage)
 		self = Entity.init(self, stage, x, y)
-		self.anim = anim
+		self.anim = anim or nil
 		self.physicbody = phbody or nil
 		self.debug = true
 		return self
 	end,
 	update = function(self,dt)
-		self.anim:update(dt)
+		if self.anim ~= nil then
+			self.anim:update(dt)
+		end
 		if self.physicbody ~= nil then
 			self.pos.x = self.physicbody:getX()
 			self.pos.y = self.physicbody:getY()

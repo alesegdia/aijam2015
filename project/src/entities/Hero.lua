@@ -14,6 +14,9 @@ Hero = Class {
   	self = GameEntity.init( self, stage, x, y, anim, phb )
   	self.shootRate = 0.1
   	self.nextShoot = love.timer.getTime() + self.shootRate
+  	self.entitytype = "hero"
+  	self.health = 20
+	phb:setUserData(self)
   	return self
   end,
   input = {

@@ -14,10 +14,12 @@ require "src.entities.PhysicWorld"
 require "src.entities.Hero"
 require "src.entities.Zombie"
 require "src.entities.Bullet"
+local MapGen = require 'src.mapgen.MapGen'
 
 Game = Gamestate.new()
 
 local color = { 255, 255, 255, 0 }
+
 
 local center = {
   x = love.graphics.getWidth() / 2,
@@ -65,17 +67,32 @@ local spawnZombie = function(x,y)
 	local z = Zombie(stage, x, y, directController)
 end
 
-function Game:enter()
-  for k,v in pairs(stage.objects) do
-	v.dead = true
-  end
-  local anim = newAnimation(Image.map8x, 1600, 1280, 1, 1)
-  GameEntity(stage,0,0,anim,nil)
-  for i=1,10 do
-	spawnZombie(50,50)
+local map = MapGen(25,20)
+local buildMap = function()
+	for i=1,map.size.w do
+		for j=1,map.size.h do
+			if map.data[i][j] == 0 then
+				local phb = stage.physicworld:createRectangleBody(i * 128 + 64,j * 128 + 64,128,128,0,"static")
+				local data = { entitytype = "wall" }
+				phb:setUserData(data)
+				GameEntity(stage, 0, 0, nil, phb)
+			end
+		end
 	end
-  hero = Hero(stage,10,50,world)
-  anim:addFrame(0,0,1600,1280,1)
+end
+
+function Game:enter()
+	for k,v in pairs(stage.objects) do
+		v.dead = true
+	end
+	local anim = newAnimation(Image.map8x, 1600, 1280, 1, 1)
+	--GameEntity(stage,0,0,anim,nil)
+	hero = Hero(stage,map.size.w/2 * 128,map.size.h/2 * 128,world)
+	anim:addFrame(0,0,1600,1280,1)
+	buildMap()
+	for i=1,10 do
+		spawnZombie(hero.pos.x+50,hero.pos.y+50)
+	end
 end
 
 function Game:update( dt )
@@ -116,6 +133,17 @@ function Game:draw()
   love.graphics.setColor({255,255,255,255})
   GameEntity.update(hero, 0)
   cam:draw( function()
+	  for i=1,map.size.w do
+	  	  for j=1,map.size.h do
+	  	  	if map.data[i][j] == 0 then
+	  	  		love.graphics.setColor(0x3f,0x3f,0x74,255)
+			else
+				love.graphics.setColor(0x9b,0xad,0xb7,255)
+			end
+			local tilesize = 128
+			love.graphics.rectangle("fill", i * tilesize, j * tilesize, tilesize, tilesize)
+		end
+	  end
 	  stage:draw()
   end)
 end

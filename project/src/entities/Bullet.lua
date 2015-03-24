@@ -17,6 +17,7 @@ Bullet = Class {
 		v2:normalize_inplace()
 		self.angle = v1:angleTo(v2)
 		GameEntity.update(self, 0)
+		self.entitytype = "bullet"
 		return self
 	end,
 	update = function(self, dt)
