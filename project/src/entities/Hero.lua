@@ -52,7 +52,6 @@ Hero = Class {
 		self.nextShoot = love.timer.getTime() + self.shootRate
 		local x,y = love.mouse.getPosition()
 		local vec = Vector(x-1024/2,y-768/2)
-		print(vec)
 		vec:normalize_inplace()
 		local speed = 1000
 		self:shoot(vec.x * speed, vec.y * speed)

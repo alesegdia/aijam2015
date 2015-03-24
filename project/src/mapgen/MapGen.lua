@@ -27,7 +27,6 @@ local MapGen = function(width, height)
 		if currentPos.y >= height or currentPos.y < 1 then
 			currentPos.y = math.floor(height/2)
 		end
-		print(currentPos.x, currentPos.y)
 		map[currentPos.x][currentPos.y] = 1
 	end
 

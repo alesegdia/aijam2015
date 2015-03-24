@@ -6,10 +6,12 @@ require (LIBRARYPATH.."AnAL")
 
 GameEntity = Class {
 	init = function(self, stage, x, y, anim, phbody)
-		print(stage)
 		self = Entity.init(self, stage, x, y)
 		self.anim = anim or nil
 		self.physicbody = phbody or nil
+		if self.physicbody ~= nil then
+			self.physicbody:setUserData(self)
+		end
 		self.debug = true
 		return self
 	end,

@@ -32,7 +32,29 @@ local m2pix = 		20
 local world =		PhysicWorld( 0, 0, m2pix )
 local stage = 		Stage(world)
 
+local checkEntities = function(a, b, s1, s2, foo)
+	if (a.entitytype == s1 and b.entitytype == s2) then
+		foo(a,b)
+	elseif (a.entitytype == s2 and b.entitytype == s1) then
+		foo(b,a)
+	end
+end
+
 local beginContact = function(a,b,coll)
+	local aent = a:getBody():getUserData()
+	local bent = b:getBody():getUserData()
+	local destroyFirst = function(e1,e2) e1.dead = true end
+	local damageFirst = function(howmuch)
+		return function(e1, e2)
+			e1.health = e1.health - howmuch
+			if e1.health <= 0 then
+				e1.dead = true
+			end
+		end
+	end
+	checkEntities(aent, bent, "bullet", "zombie", destroyFirst)
+	checkEntities(aent, bent, "bullet", "wall", destroyFirst)
+	checkEntities(aent, bent, "zombie", "bullet", damageFirst(10))
 end
 
 local endContact = function(a,b,coll)
@@ -74,8 +96,8 @@ local buildMap = function()
 			if map.data[i][j] == 0 then
 				local phb = stage.physicworld:createRectangleBody(i * 128 + 64,j * 128 + 64,128,128,0,"static")
 				local data = { entitytype = "wall" }
-				phb:setUserData(data)
-				GameEntity(stage, 0, 0, nil, phb)
+				local block = GameEntity(stage, 0, 0, nil, phb)
+				block.physicbody:setUserData(data)
 			end
 		end
 	end
@@ -90,7 +112,7 @@ function Game:enter()
 	hero = Hero(stage,map.size.w/2 * 128,map.size.h/2 * 128,world)
 	anim:addFrame(0,0,1600,1280,1)
 	buildMap()
-	for i=1,10 do
+	for i=1,100 do
 		spawnZombie(hero.pos.x+50,hero.pos.y+50)
 	end
 end
@@ -133,16 +155,16 @@ function Game:draw()
   love.graphics.setColor({255,255,255,255})
   GameEntity.update(hero, 0)
   cam:draw( function()
+	local tilesize = 128
+	  love.graphics.setColor(0x9b,0xad,0xb7,255)
+  	  love.graphics.rectangle("fill", 0, 0, map.size.w * tilesize, map.size.h * tilesize)
 	  for i=1,map.size.w do
-	  	  for j=1,map.size.h do
-	  	  	if map.data[i][j] == 0 then
-	  	  		love.graphics.setColor(0x3f,0x3f,0x74,255)
-			else
-				love.graphics.setColor(0x9b,0xad,0xb7,255)
-			end
-			local tilesize = 128
-			love.graphics.rectangle("fill", i * tilesize, j * tilesize, tilesize, tilesize)
-		end
+		  for j=1,map.size.h do
+			  if map.data[i][j] == 0 then
+				  love.graphics.setColor(0x3f,0x3f,0x74,255)
+				  love.graphics.rectangle("fill", i * tilesize, j * tilesize, tilesize, tilesize)
+			  end
+		  end
 	  end
 	  stage:draw()
   end)
