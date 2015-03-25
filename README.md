@@ -1,1 +1,1 @@
-# Shitty and tiny game for the AIJAM 2015
+# Tiny game for the AIJAM 2015
