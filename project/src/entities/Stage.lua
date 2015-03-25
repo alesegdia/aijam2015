@@ -30,7 +30,9 @@ Stage = Class{
 			if v then
 				v:update(dt)
 				if v.dead then
-					v.physicbody:destroy()
+					if v.physicbody ~= nil then
+						v.physicbody:destroy()
+					end
 					if v.remove then
 					  v:remove()
 					end

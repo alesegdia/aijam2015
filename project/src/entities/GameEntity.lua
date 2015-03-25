@@ -7,6 +7,7 @@ require (LIBRARYPATH.."AnAL")
 GameEntity = Class {
 	init = function(self, stage, x, y, anim, phbody)
 		self = Entity.init(self, stage, x, y)
+		self.controller = nil
 		self.anim = anim or nil
 		self.physicbody = phbody or nil
 		if self.physicbody ~= nil then
@@ -16,6 +17,9 @@ GameEntity = Class {
 		return self
 	end,
 	update = function(self,dt)
+		if self.controller ~= nil then
+			self:controller()
+		end
 		if self.anim ~= nil then
 			self.anim:update(dt)
 		end

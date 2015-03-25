@@ -6,10 +6,7 @@ local Class         = require (LIBRARYPATH.."hump.class"	)
 local RC_nearest = function( rh )
   return function( fixture, x, y, xn, yn, fraction )
   	local userdata = fixture:getBody():getUserData()
-  	if userdata.entitytype ~= "zombie" then
-  		return -1
-  	end
-	rh.fix = fixture
+	rh.lastent = userdata
 	rh.x, rh.y, rh.xn, rh.yn = x, y, xn, yn
 	return fraction
   end
@@ -36,9 +33,10 @@ PhysicWorld = Class {
   	  local anglestep = coneAngle / numRays
   	  for i=-coneAngle/2,coneAngle/2,anglestep do
   	  	  local rh = self:raycast( origin, dir, i )
-  	  	  if rh.fix ~= nil then
-  	  	  	  print("yay")
-  	  	  	  handler(rh.fix:getBody():getUserData())
+  	  	  if rh.lastent ~= nil then
+  	  	  	  if rh.lastent.entitytype == "zombie" then
+				handler(rh.lastent)
+			end
 		  end
 	  end
   end,

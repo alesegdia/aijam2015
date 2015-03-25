@@ -12,7 +12,7 @@ Hero = Class {
 	anim:addFrame(0,0,44,88,1)
 	local phb = world:createPlayer(x, y)
   	self = GameEntity.init( self, stage, x, y, anim, phb )
-  	self.shootRate = 0.5
+  	self.shootRate = 0.2
   	self.nextShoot = love.timer.getTime() + self.shootRate
   	self.entitytype = "hero"
   	self.health = 20
@@ -84,12 +84,18 @@ Hero = Class {
 	self.pos.x = self.pos.x + self.deltaboing.x
 	self.pos.y = self.pos.y + self.deltaboing.y
   end,
+
   shoot = function(self, vx, vy)
-  	  --self.physicbody:applyForce(-vx*100, -vy*100)
+  	  self.physicbody:applyForce(-vx*100, -vy*100)
+  	  camshake = camshake + 10
   	  self.stage.physicworld:raycastShotgun(self.pos, Vector(-vx,-vy), 30, 5,
 	  function(ent)
 		  ent.health = ent.health - 5
 		  if ent.health <= 0 then ent.dead = true end
+			spawnBloodParticle(ent.pos.x, ent.pos.y, -2, -1)
+			spawnBloodParticle(ent.pos.x, ent.pos.y, 2, -1)
+			spawnBloodParticle(ent.pos.x, ent.pos.y, -2, 1)
+			spawnBloodParticle(ent.pos.x, ent.pos.y, 2, 1)
 	  end)
   	  --[[
 	  local finalpos = self.pos + Vector(0,0)

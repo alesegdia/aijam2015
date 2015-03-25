@@ -13,7 +13,7 @@ local MapGen = function(width, height)
 
 	local currentPos = { x = height/2, y = width/2 }
 
-	love.math.setRandomSeed(0xDEADBEEF)
+	love.math.setRandomSeed(0xFACEFEED)
 	local rollDice = function()
 		return love.math.random(0,5)
 	end

@@ -6,6 +6,7 @@ local Gamestate     = require (LIBRARYPATH.."hump.gamestate")
 local gui       = require( LIBRARYPATH.."Quickie"           )
 local camera = require (LIBRARYPATH.."hump.camera")
 timer = require (LIBRARYPATH.."hump.timer")
+local Vector        = require (LIBRARYPATH.."hump.vector"	)
 local tween         = timer.tween
 
 require "src.entities.Stage"
@@ -71,6 +72,8 @@ world.w:setCallbacks( beginContact, endContact, preSolve, postSolve )
 local hero = nil
 local cam = camera.new(0,0,1,0)
 
+camshake = 0
+
 
 local directController = function(zombie)
 	local v2p = hero.pos - zombie.pos
@@ -103,6 +106,41 @@ local buildMap = function()
 	end
 end
 
+spawnBloodParticle = function (x, y, dx, dy)
+	local anim = newAnimation(Image.blood, 4, 4, 1, 1)
+	anim:addFrame(0,0,4,4,1)
+	local particle = GameEntity(stage, x, y, anim, nil)
+
+	local vec = Vector(dx,dy) * 20
+	local tmp = { x = particle.pos.x, y = particle.pos.y }
+	timer.tween(0.2, tmp, { y = tmp.y + vec.y}, 'linear',
+	function()
+		timer.add(1, function() particle.dead=true end)
+	end)
+	timer.tween(0.2, tmp, { x = tmp.x + vec.x}, 'linear')
+
+	local boing = { y = 0 }
+	timer.tween(0.1, boing, {y = 10}, 'out-quad', function()
+		timer.tween(0.1, boing, {y = 0}, 'quad')
+	end)
+
+	particle.controller = function(self)
+		self.pos.x = tmp.x
+		self.pos.y = tmp.y - boing.y
+	end
+
+end
+
+tefunc = function()
+	local myrand = function (spread)
+		return (love.math.random(spread)-spread/2)/10
+	end
+	spawnBloodParticle(hero.pos.x, hero.pos.y, -2 + myrand(20), -1 + myrand(20))
+	spawnBloodParticle(hero.pos.x, hero.pos.y, 2 + myrand(20), -1 + myrand(20))
+	spawnBloodParticle(hero.pos.x, hero.pos.y, -2, 1)
+	spawnBloodParticle(hero.pos.x, hero.pos.y, 2, 1)
+end
+
 function Game:enter()
 	for k,v in pairs(stage.objects) do
 		v.dead = true
@@ -110,12 +148,15 @@ function Game:enter()
 	local anim = newAnimation(Image.map8x, 1600, 1280, 1, 1)
 	--GameEntity(stage,0,0,anim,nil)
 	hero = Hero(stage,map.size.w/2 * 128,map.size.h/2 * 128,world)
+	timer.add(2, tefunc)
+	--spawnBloodParticle(hero.pos.x, hero.pos.y, 1, 1)
 	anim:addFrame(0,0,1600,1280,1)
 	buildMap()
-	for i=1,0 do
+	for i=1,100 do
 		spawnZombie(hero.pos.x+50,hero.pos.y+50)
 	end
 end
+
 
 function Game:update( dt )
 	timer.update(dt)
@@ -154,6 +195,11 @@ function Game:draw()
   love.graphics.setColor({255,0,0,255})
   love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 50)
   love.graphics.setColor({255,255,255,255})
+  camshake = camshake * 0.9
+  cam:lookAt(
+  	cam.x + (love.math.random() - 0.5) * camshake,
+  	cam.y + (love.math.random() - 0.5) * camshake
+	)
   cam:draw( function()
 	local tilesize = 128
 	  love.graphics.setColor(0x9b,0xad,0xb7,255)
