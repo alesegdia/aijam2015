@@ -41,18 +41,19 @@ local checkEntities = function(a, b, s1, s2, foo)
 	end
 end
 
+local destroyFirst = function(e1,e2) e1.dead = true end
+local damageFirst = function(howmuch)
+	return function(e1, e2)
+		e1.health = e1.health - howmuch
+		if e1.health <= 0 then
+			e1.dead = true
+		end
+	end
+end
+
 local beginContact = function(a,b,coll)
 	local aent = a:getBody():getUserData()
 	local bent = b:getBody():getUserData()
-	local destroyFirst = function(e1,e2) e1.dead = true end
-	local damageFirst = function(howmuch)
-		return function(e1, e2)
-			e1.health = e1.health - howmuch
-			if e1.health <= 0 then
-				e1.dead = true
-			end
-		end
-	end
 	checkEntities(aent, bent, "bullet", "zombie", destroyFirst)
 	checkEntities(aent, bent, "bullet", "wall", destroyFirst)
 	checkEntities(aent, bent, "zombie", "bullet", damageFirst(10))
@@ -187,6 +188,8 @@ function Game:mousereleased(x, y, button)
 	end
 end
 
+debugRays = {}
+
 
 function Game:draw()
   love.graphics.setFont(smallFont)
@@ -213,5 +216,10 @@ function Game:draw()
 		  end
 	  end
 	  stage:draw()
+	  --[[
+	  for k,v in pairs(debugRays) do
+		--love.graphics.line(v.o.x, v.o.y, v.o.x + v.dir.x * 10, v.o.y + v.dir.y * 10)
+	  end
+	  ]]--
   end)
 end

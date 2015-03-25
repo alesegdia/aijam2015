@@ -32,6 +32,7 @@ PhysicWorld = Class {
   raycastShotgun = function( self, origin, dir, coneAngle, numRays, handler )
   	  local anglestep = coneAngle / numRays
   	  for i=-coneAngle/2,coneAngle/2,anglestep do
+
   	  	  local rh = self:raycast( origin, dir, i )
   	  	  if rh.lastent ~= nil then
   	  	  	  if rh.lastent.entitytype == "zombie" then
@@ -44,6 +45,7 @@ PhysicWorld = Class {
   raycast = function(self, base, dir, angle )
 	  angle = angle or 0
 	  local v = dir:rotated(angle)
+		table.insert(debugRays, {o = base, dir = v})
 	  local rayhit = { x=0,y=0,xn=0,yn=0,fix=nil }
 	  --print("vx: " .. angle) -- base.x)
 	  --print("vy: " .. base.y)

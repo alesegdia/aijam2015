@@ -86,9 +86,9 @@ Hero = Class {
   end,
 
   shoot = function(self, vx, vy)
-  	  self.physicbody:applyForce(-vx*100, -vy*100)
-  	  camshake = camshake + 10
-  	  self.stage.physicworld:raycastShotgun(self.pos, Vector(-vx,-vy), 30, 5,
+  	  self.physicbody:applyForce(-vx*50, -vy*50)
+  	  camshake = camshake + 20
+  	  self.stage.physicworld:raycastShotgun(self.pos + Vector(0,30), Vector(vx,vy), math.rad(20), 10,
 	  function(ent)
 		  ent.health = ent.health - 5
 		  if ent.health <= 0 then ent.dead = true end
