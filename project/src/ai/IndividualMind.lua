@@ -11,6 +11,13 @@ IndividualMind = Class {
 		self.forward = Vector(0,0)
 		self.thurst = 0
 		self.steer = 0
+
+		-- Vectores de influencia:
+		-- * Separación (gira para evitar obstáculos y vecinos locales)
+		-- * Alineación (apuntar hacia donde apunta la media)
+		-- * Cohesión (giro hacia la posición media)
+		-- * Objetivo Hero?
+
 		self.influenceWeight = {
 			separation = 1,
 			alignment = 1,
@@ -33,31 +40,45 @@ IndividualMind = Class {
 		self.pawn.physicbody.setAngle(self.pawn.physicbody:getAngle() + self.steer)
 	end,
 
-	perceive = function(self)
+	computeInfluence = function(self)
+		self:resetSteer()
 		self.perceived = {}
 		-- perform raycast
 		local physicsResult = ( function () return {} end ) ()
+		local sumAngle = 0
+		local numAngles = 0
 		for k, ent in pairs(physicsResult) do
-			local dist2 = ent.zombie.pos:dist2( self.zombie.pos )
+			local diff = ent.zombie.pos - self.zombie.pos
+			local len = diff.len()
 			if ent.entitytype == "zombie" then
 				if ent.teamid == self.globalmind.teamid then
-					if dist2 < 10000 then
+					if len < 100 then
 						-- influences friend separation
-					end
-					if dist2 < 50000 then
-						-- influences alineation
+						self.influenceVecs.separation.sum_inplace( -diff * (1/len) )
+					elseif len > 200 and len < 500 then
 						-- influences cohesion
 					end
+					if len < 500 then
+						-- influences alignment
+						sumAngle = sumAngle + ent.physicbody:getAngle()
+						numAngles = numAngles + 1
+					end
 				else
-					if dist2 < 50000 then
+					if len < 500 then
 						-- influences strange zombie separation
 					end
 				end
 			elseif ent.entitytype == "wall" then
-				if dist2 < 50000 then
+				if len < 500 then
 					-- influences wall separation
 				end
 			end
 		end
+		local avgAngle = sumAngle / #physicsResult
+		-- apply separation, cohesion and alignment
+	end,
+
+	decideSteerBasedOnInfluence = function(self)
+
 	end
 }
