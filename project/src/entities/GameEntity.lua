@@ -4,12 +4,16 @@ local Class         = require (LIBRARYPATH.."hump.class"	)
 require "src.entities.Entity"
 require (LIBRARYPATH.."AnAL")
 
+local nextEntityID = 0
+
 GameEntity = Class {
 	init = function(self, stage, x, y, anim, phbody)
 		self = Entity.init(self, stage, x, y)
 		self.controller = nil
 		self.anim = anim or nil
 		self.physicbody = phbody or nil
+		self.id = nextEntityID
+		nextEntityID = nextEntityID + 1
 		if self.physicbody ~= nil then
 			self.physicbody:setUserData(self)
 		end

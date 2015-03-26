@@ -10,6 +10,7 @@ GlobalMind = Class {
 
 	init = function(self, hero, zombies, teamid)
 		self.teamid = teamid
+		self.hero = hero
 		self.minions = {}
 		for k,v in pairs(zombies) do
 			self.minions[k] = IndividualMind(self,v)
@@ -22,6 +23,13 @@ GlobalMind = Class {
 			individual:computeInfluence()
 			individual:decideSteerBasedOnInfluence()
 			individual:applySteer()
+			individual.pawn.physicbody:setLinearVelocity()
+		end
+	end,
+
+	debugDraw = function(self)
+		for k, individual in pairs(self.minions) do
+			individual:debugDraw()
 		end
 	end
 

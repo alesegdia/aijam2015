@@ -44,6 +44,16 @@ PhysicWorld = Class {
 
   -- returns elements in area
   raycastZombiePerception = function( self, origin, numRays )
+  	  local coneAngle = 360
+  	  local anglestep = coneAngle / numRays
+  	  local neighboors = {}
+  	  for i=-coneAngle/2,coneAngle/2,anglestep do
+  	  	  local rh = self:raycast( origin, dir, i, 500 )
+  	  	  if rh.lastent ~= nil then
+			neighboors[rh.lastent.id] = rh.lastent.id
+		  end
+	  end
+	  return neighboors
   	  -- maybe query? would suffice
   end,
 

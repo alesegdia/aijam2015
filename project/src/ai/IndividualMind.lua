@@ -1,16 +1,19 @@
 
 local Class = require (LIBRARYPATH.."hump.class")
+local Vector        = require (LIBRARYPATH.."hump.vector"	)
 
 require 'src.entities.Zombie'
 
 IndividualMind = Class {
 
-	init = function(self, globalmind, zombie)
+	init = function(self, globalmind, pawn)
 		self.globalmind = globalmind
 		self.pawn = pawn
-		self.forward = Vector(0,0)
-		self.thurst = 0
+		self.forward = Vector(1,0)
+		self.thurst = 100
 		self.steer = 0
+
+		self.pawn.ai = self
 
 		-- Vectores de influencia:
 		-- * Separación (gira para evitar obstáculos y vecinos locales)
@@ -40,11 +43,17 @@ IndividualMind = Class {
 		self.pawn.physicbody.setAngle(self.pawn.physicbody:getAngle() + self.steer)
 	end,
 
+	controller = function(pawn)
+		pawn.ai.forward = pawn.ai.globalmind.hero.pos - pawn.pos
+		pawn.ai.forward:trim_inplace(1)
+		pawn.physicbody:setLinearVelocity(pawn.ai.forward.x * pawn.ai.thurst, pawn.ai.forward.y * pawn.ai.thurst)
+	end,
+
 	computeInfluence = function(self)
 		self:resetSteer()
 		self.perceived = {}
 		-- perform raycast
-		local physicsResult = ( function () return {} end ) ()
+		local physicsResult = self.pawn.stage.physicworld:raycastZombiePerception(self.pawn.pos, 360)
 		local sumAngle = 0
 		local numAngles = 0
 		for k, ent in pairs(physicsResult) do
@@ -60,6 +69,7 @@ IndividualMind = Class {
 					end
 					if len < 500 then
 						-- influences alignment
+						assert(ent.ai, "Entity doesn't have an individual mind.")
 						sumAngle = sumAngle + ent.physicbody:getAngle()
 						numAngles = numAngles + 1
 					end
@@ -74,11 +84,17 @@ IndividualMind = Class {
 				end
 			end
 		end
-		local avgAngle = sumAngle / #physicsResult
+		local avgAngle = sumAngle / numAngles
 		-- apply separation, cohesion and alignment
 	end,
 
-	decideSteerBasedOnInfluence = function(self)
+	debugDraw = function(self)
+		local fwd = self.pawn.pos + self.forward * 20
+		print(self.forward)
+		love.graphics.line(self.pawn.pos.x, self.pawn.pos.y, fwd.x, fwd.y)
+	end,
 
+	decideSteerBasedOnInfluence = function(self)
+	
 	end
 }

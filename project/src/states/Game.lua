@@ -87,10 +87,27 @@ local directController = function(zombie)
 	end
 end
 
-local spawnZombie = function(x,y)
+local spawnZombieWithDirectController = function(x,y)
 	x = x + love.math.random() * 300
 	y = y + love.math.random() * 300
 	local z = Zombie(stage, x, y, directController)
+end
+
+local swarm
+local spawnZombieSwarm = function(x,y,howmany,teamid,spread)
+	local zombies = {}
+	spread = spread or 1000
+	for i=1,howmany do
+		x = x + love.math.random() * spread
+		y = y + love.math.random() * spread
+		table.insert(zombies, Zombie(stage, x, y))
+	end
+
+	-- dirty
+	swarm = GlobalMind(hero, zombies, teamid)
+	for k,z in pairs(zombies) do
+		z.controller = z.ai.controller
+	end
 end
 
 local map = MapGen(25,20)
@@ -153,9 +170,13 @@ function Game:enter()
 	--spawnBloodParticle(hero.pos.x, hero.pos.y, 1, 1)
 	anim:addFrame(0,0,1600,1280,1)
 	buildMap()
+	spawnZombieSwarm(map.size.w/2 * 128, map.size.h/2*128,1,"ZomboidTeam", 1)
+
+	--[[
 	for i=1,100 do
-		spawnZombie(hero.pos.x+50,hero.pos.y+50)
+		spawnZombieWithDirectController(hero.pos.x+50,hero.pos.y+50)
 	end
+	]]--
 end
 
 
@@ -216,6 +237,7 @@ function Game:draw()
 		  end
 	  end
 	  stage:draw()
+	  swarm:debugDraw()
 	  --[[
 	  for k,v in pairs(debugRays) do
 		--love.graphics.line(v.o.x, v.o.y, v.o.x + v.dir.x * 10, v.o.y + v.dir.y * 10)

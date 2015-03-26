@@ -5,6 +5,7 @@ local Vector        = require (LIBRARYPATH.."hump.vector"	)
 require "src.entities.GameEntity"
 require (LIBRARYPATH.."AnAL")
 
+
 Zombie = Class {
   init = function(self, stage, x, y, controller)
 	local anim = newAnimation(Image.zombie_sheet_4x,40,48,1,1)
@@ -17,6 +18,7 @@ Zombie = Class {
   	phb:setUserData(self)
   	return self
   end,
+
   update = function(self,dt)
 
 	self:controller()
