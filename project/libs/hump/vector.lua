@@ -120,6 +120,12 @@ function vector.dist2(a, b)
 	return (dx * dx + dy * dy)
 end
 
+function vector.sum_inplace(a, b)
+	assert(isvector(a) and isvector(b), "sum_inplace: wrong argument types (<vector> expected)")
+	a.x = a.x + b.x
+	a.y = a.y + b.y
+end
+
 function vector:normalize_inplace()
 	local l = self:len()
 	if l > 0 then
