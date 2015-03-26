@@ -15,16 +15,16 @@ GlobalMind = Class {
 		for k,v in pairs(zombies) do
 			self.minions[k] = IndividualMind(self,v)
 		end
+		self.lastguyindex = 0
 	end,
 
 	step = function(self)
-		for k, individual in pairs(self.minions) do
-			individual:resetSteer()
+		self.lastguyindex = (self.lastguyindex+1) % #self.minions + 1
+		local individual = self.minions[self.lastguyindex]
 			individual:computeInfluence()
 			individual:decideSteerBasedOnInfluence()
 			individual:applySteer()
-			individual.pawn.physicbody:setLinearVelocity()
-		end
+			--individual.pawn.physicbody:setLinearVelocity()
 	end,
 
 	debugDraw = function(self)

@@ -96,7 +96,7 @@ Hero = Class {
 			spawnBloodParticle(ent.pos.x, ent.pos.y, 2, -1)
 			spawnBloodParticle(ent.pos.x, ent.pos.y, -2, 1)
 			spawnBloodParticle(ent.pos.x, ent.pos.y, 2, 1)
-	  end)
+	  end, self)
   	  --[[
 	  local finalpos = self.pos + Vector(0,0)
 	  Bullet(self.stage, finalpos.x, finalpos.y, vx, vy)

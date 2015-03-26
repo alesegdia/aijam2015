@@ -98,9 +98,10 @@ local spawnZombieSwarm = function(x,y,howmany,teamid,spread)
 	local zombies = {}
 	spread = spread or 1000
 	for i=1,howmany do
-		x = x + love.math.random() * spread
-		y = y + love.math.random() * spread
-		table.insert(zombies, Zombie(stage, x, y))
+		local px, py;
+		px = x + love.math.random() * spread
+		py = y + love.math.random() * spread
+		table.insert(zombies, Zombie(stage, px,py))
 	end
 
 	-- dirty
@@ -111,12 +112,15 @@ local spawnZombieSwarm = function(x,y,howmany,teamid,spread)
 end
 
 local map = MapGen(25,20)
+local lastWallID = -1
 local buildMap = function()
 	for i=1,map.size.w do
 		for j=1,map.size.h do
 			if map.data[i][j] == 0 then
 				local phb = stage.physicworld:createRectangleBody(i * 128 + 64,j * 128 + 64,128,128,0,"static")
-				local data = { entitytype = "wall" }
+				local posx, posy = phb:getPosition()
+				local data = { entitytype = "wall", id=lastWallID, pos=Vector(posx, posy) }
+				lastWallID = lastWallID - 1
 				local block = GameEntity(stage, 0, 0, nil, phb)
 				block.physicbody:setUserData(data)
 			end
@@ -170,7 +174,7 @@ function Game:enter()
 	--spawnBloodParticle(hero.pos.x, hero.pos.y, 1, 1)
 	anim:addFrame(0,0,1600,1280,1)
 	buildMap()
-	spawnZombieSwarm(map.size.w/2 * 128, map.size.h/2*128,1,"ZomboidTeam", 1)
+	spawnZombieSwarm(map.size.w/2 * 128, map.size.h/2*128,1,"ZomboidTeam", 100)
 
 	--[[
 	for i=1,100 do
@@ -183,6 +187,7 @@ end
 function Game:update( dt )
 	timer.update(dt)
 	stage:update(dt)
+	swarm:step()
 	local x,y = hero.physicbody:getPosition()
 	cam:lookAt(x,y)
 	if gui.Button{text = "Go back"} then
@@ -213,11 +218,6 @@ debugRays = {}
 
 
 function Game:draw()
-  love.graphics.setFont(smallFont)
-  love.graphics.setColor(color)
-  gui.core.draw()
-  love.graphics.setColor({255,0,0,255})
-  love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 50)
   love.graphics.setColor({255,255,255,255})
   camshake = camshake * 0.9
   cam:lookAt(
@@ -238,10 +238,15 @@ function Game:draw()
 	  end
 	  stage:draw()
 	  swarm:debugDraw()
-	  --[[
 	  for k,v in pairs(debugRays) do
-		--love.graphics.line(v.o.x, v.o.y, v.o.x + v.dir.x * 10, v.o.y + v.dir.y * 10)
+		--love.graphics.line(v.o.x, v.o.y, v.dir.x , v.dir.y)
 	  end
-	  ]]--
+	  debugRays = {}
   end)
+
+  love.graphics.setFont(smallFont)
+  love.graphics.setColor(color)
+  gui.core.draw()
+  love.graphics.setColor({255,0,0,255})
+  love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 50)
 end

@@ -1,14 +1,34 @@
 
 
 local Class         = require (LIBRARYPATH.."hump.class"	)
+local Vector        = require (LIBRARYPATH.."hump.vector"	)
 
 
-local RC_nearest = function( rh )
+local RC_nearest_PERC = function( rh, ignore )
+	ignore = ignore or {}
   return function( fixture, x, y, xn, yn, fraction )
   	local userdata = fixture:getBody():getUserData()
 	rh.lastent = userdata
-	rh.x, rh.y, rh.xn, rh.yn = x, y, xn, yn
-	return fraction
+	if rh.lastent ~= ignore then
+		rh.x, rh.y, rh.xn, rh.yn = x, y, xn, yn
+		return fraction
+	else
+		return -1
+	end
+  end
+end
+
+local RC_nearest = function( rh, ignore )
+	ignore = ignore or {}
+  return function( fixture, x, y, xn, yn, fraction )
+  	local userdata = fixture:getBody():getUserData()
+	rh.lastent = userdata
+	if rh.lastent ~= ignore then
+		rh.x, rh.y, rh.xn, rh.yn = x, y, xn, yn
+		return fraction
+	else
+		return 1
+	end
   end
 end
 
@@ -29,11 +49,12 @@ PhysicWorld = Class {
 	self.m2pix = m2pix
   end,
 
-  raycastShotgun = function( self, origin, dir, coneAngle, numRays, handler )
+  -- FIX TO NOT DETECT ITSELF, SEND HERO
+  raycastShotgun = function( self, origin, dir, coneAngle, numRays, handler, shooter )
   	  local anglestep = coneAngle / numRays
   	  for i=-coneAngle/2,coneAngle/2,anglestep do
 
-  	  	  local rh = self:raycast( origin, dir, i )
+  	  	  local rh = self:raycast( origin, dir, i, 1000, shooter, RC_nearest )
   	  	  if rh.lastent ~= nil then
   	  	  	  if rh.lastent.entitytype == "zombie" then
 				handler(rh.lastent)
@@ -43,29 +64,32 @@ PhysicWorld = Class {
   end,
 
   -- returns elements in area
-  raycastZombiePerception = function( self, origin, numRays )
+  raycastZombiePerception = function( self, zombie, dir, numRays )
   	  local coneAngle = 360
   	  local anglestep = coneAngle / numRays
   	  local neighboors = {}
   	  for i=-coneAngle/2,coneAngle/2,anglestep do
-  	  	  local rh = self:raycast( origin, dir, i, 500 )
-  	  	  if rh.lastent ~= nil then
-			neighboors[rh.lastent.id] = rh.lastent.id
+  	  	  local rh = self:raycast( zombie.pos, Vector(1,0), i, 1000, zombie, RC_nearest_PERC )
+  	  	  if rh.lastent ~= nil and rh.lastent ~= zombie then
+  	  	  	  local obj = { point = Vector(rh.x, rh.y), ent = rh.lastent }
+			neighboors[rh.lastent.id] = obj
 		  end
 	  end
 	  return neighboors
   	  -- maybe query? would suffice
   end,
 
-  raycast = function(self, base, dir, angle, raymod )
+  raycast = function(self, base, dir, angle, raymod, ignore, func )
+  	  ignore = ignore or {}
 	  angle = angle or 0
 	  raymod = raymod or 2000
-	  local v = dir:rotated(angle)
+	  print("raymod", raymod)
+	  local v = base + dir:rotated(angle) * raymod
 		table.insert(debugRays, {o = base, dir = v})
 	  local rayhit = { x=0,y=0,xn=0,yn=0,fix=nil }
 	  --print("vx: " .. angle) -- base.x)
 	  --print("vy: " .. base.y)
-	  self.w:rayCast(base.x, base.y, base.x+v.x*raymod,base.y+v.y*raymod,RC_nearest(rayhit))
+	  self.w:rayCast(base.x, base.y, v.x,v.y,func(rayhit, ignore))
 	  return rayhit
   end,
 

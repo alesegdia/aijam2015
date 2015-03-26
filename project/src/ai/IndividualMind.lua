@@ -40,28 +40,34 @@ IndividualMind = Class {
 	end,
 
 	applySteer = function(self)
-		self.pawn.physicbody.setAngle(self.pawn.physicbody:getAngle() + self.steer)
 	end,
 
 	controller = function(pawn)
-		pawn.ai.forward = pawn.ai.globalmind.hero.pos - pawn.pos
-		pawn.ai.forward:trim_inplace(1)
 		pawn.physicbody:setLinearVelocity(pawn.ai.forward.x * pawn.ai.thurst, pawn.ai.forward.y * pawn.ai.thurst)
+	end,
+
+	resetInfluence = function(self)
+		for k,v in pairs(self.influenceVecs) do
+			v.x, v.y = 0, 0
+		end
 	end,
 
 	computeInfluence = function(self)
 		self:resetSteer()
+		self:resetInfluence()
 		self.perceived = {}
 		-- perform raycast
-		local physicsResult = self.pawn.stage.physicworld:raycastZombiePerception(self.pawn.pos, 360)
+		local physicsResult = self.pawn.stage.physicworld:raycastZombiePerception(self.pawn, self.forward, 360)
 		local sumAngle = 0
 		local numAngles = 0
-		for k, ent in pairs(physicsResult) do
-			local diff = ent.zombie.pos - self.zombie.pos
-			local len = diff.len()
+		for k, hit in pairs(physicsResult) do
+			local ent = hit.ent
+			local diff = hit.point - self.pawn.pos
+			local len = diff:len()
 			if ent.entitytype == "zombie" then
+				print("zombie")
 				if ent.teamid == self.globalmind.teamid then
-					if len < 100 then
+					if len < 200 then
 						-- influences friend separation
 						self.influenceVecs.separation.sum_inplace( -diff * (1/len) )
 					elseif len > 200 and len < 500 then
@@ -78,20 +84,35 @@ IndividualMind = Class {
 						-- influences strange zombie separation
 					end
 				end
-			elseif ent.entitytype == "wall" then
-				if len < 500 then
-					-- influences wall separation
-				end
+			elseif ent.entitytype == "wall" and len < 100 then
+				print(ent.entitytype, "is near")
+				local arg = -diff * (0.5/len)
+				local vec = Vector(arg.x, arg.y)
+				self.influenceVecs.separation:sum_inplace( vec )
+			elseif ent.entitytype == "hero" and len < 1000 then
+				print(ent.entitytype, "is near")
+				local arg = diff * (1/len)
+				local vec = Vector(arg.x, arg.y)
+				self.influenceVecs.separation:sum_inplace( vec )
 			end
 		end
 		local avgAngle = sumAngle / numAngles
+		--self.pawn.ai.forward = pawn.ai.globalmind.hero.pos - pawn.pos
+		
+		--self.pawn.ai.forward:sum_inplace(
+		self.pawn.ai.forward:sum_inplace(self.influenceVecs.separation)
+		self.pawn.ai.forward:trim_inplace(1)
 		-- apply separation, cohesion and alignment
 	end,
 
 	debugDraw = function(self)
 		local fwd = self.pawn.pos + self.forward * 20
-		print(self.forward)
 		love.graphics.line(self.pawn.pos.x, self.pawn.pos.y, fwd.x, fwd.y)
+		for k,v in pairs(self.influenceVecs) do
+			fwd = self.pawn.pos + v * 20
+			love.graphics.line(self.pawn.pos.x, self.pawn.pos.y, fwd.x, fwd.y)
+
+		end
 	end,
 
 	decideSteerBasedOnInfluence = function(self)

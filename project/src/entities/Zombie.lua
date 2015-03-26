@@ -11,6 +11,7 @@ Zombie = Class {
 	local anim = newAnimation(Image.zombie_sheet_4x,40,48,1,1)
 	anim:addFrame(0,0,40,48,1)
 	local phb = stage.physicworld:createZombie(x, y)
+	phb:setSleepingAllowed(false)
   	self = GameEntity.init( self, stage, x, y, anim, phb )
   	self.controller = controller or function(self) print("im dumb heh") end
   	self.entitytype = "zombie"
