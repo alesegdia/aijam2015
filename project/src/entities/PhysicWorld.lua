@@ -42,14 +42,20 @@ PhysicWorld = Class {
 	  end
   end,
 
-  raycast = function(self, base, dir, angle )
+  -- returns elements in area
+  raycastZombiePerception = function( self, origin, numRays )
+  	  -- maybe query? would suffice
+  end,
+
+  raycast = function(self, base, dir, angle, raymod )
 	  angle = angle or 0
+	  raymod = raymod or 2000
 	  local v = dir:rotated(angle)
 		table.insert(debugRays, {o = base, dir = v})
 	  local rayhit = { x=0,y=0,xn=0,yn=0,fix=nil }
 	  --print("vx: " .. angle) -- base.x)
 	  --print("vy: " .. base.y)
-	  self.w:rayCast(base.x, base.y, base.x+v.x*2000,base.y+v.y*2000,RC_nearest(rayhit))
+	  self.w:rayCast(base.x, base.y, base.x+v.x*raymod,base.y+v.y*raymod,RC_nearest(rayhit))
 	  return rayhit
   end,
 
