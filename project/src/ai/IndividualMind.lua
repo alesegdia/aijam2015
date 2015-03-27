@@ -6,11 +6,35 @@ require 'src.entities.Zombie'
 
 IndividualMind = Class {
 
+	formations = {
+		unite = function(pthurst)
+			return {
+				friendSeparation = 5,
+				wallSeparation = 5,
+				alignment = 10,
+				cohesion = 1,
+				objective = 1,
+				thurst = pthurst
+			}
+		end,
+		ambush = function(pthurst)
+			return {
+				friendSeparation = 10,
+				wallSeparation = 20,
+				alignment = 1,
+				cohesion = 1,
+				objective = 1,
+				thurst = pthurst
+			}
+		end,
+
+	},
+
 	init = function(self, globalmind, pawn)
 		self.globalmind = globalmind
 		self.pawn = pawn
 		self.forward = Vector(0,0)
-		self.thurst = 100
+		self.thurst = 250
 		self.steer = 0
 
 		self.pawn.ai = self
@@ -21,12 +45,7 @@ IndividualMind = Class {
 		-- * Cohesión (giro hacia la posición media)
 		-- * Objetivo Hero?
 
-		self.influenceWeight = {
-			separation = 1,
-			alignment = 1,
-			cohesion = 1,
-			objective = 1
-		}
+		self.influenceWeight = self.formations.ambush(250)
 		self.influenceVecs = {
 			friendSeparation = Vector(0,0),
 			wallSeparation = Vector(0,0),
@@ -60,7 +79,8 @@ IndividualMind = Class {
 		-- perform raycast
 		local physicsResult = self.pawn.stage.physicworld:raycastZombiePerception(self.pawn, self.forward, 360)
 		local sumFwd = Vector(0,0)
-		local numAngles = 0
+		local numFriendsNearby = 0
+		self.numwalls = 0
 		for k, hit in pairs(physicsResult) do
 			local ent = hit.ent
 			local diff = hit.point - self.pawn.pos
@@ -68,17 +88,15 @@ IndividualMind = Class {
 			if ent.entitytype == "zombie" then
 				if ent.ai.globalmind.teamid == self.globalmind.teamid then
 					if len < 50 then
-						-- influences friend separation
-						self.influenceVecs.friendSeparation:sum_inplace( -diff * (1/len) )
+						self.influenceVecs.friendSeparation:sum_inplace( -diff / len )
 					elseif len > 100 and len < 500 then
-						-- influences cohesion
-						self.influenceVecs.cohesion:sum_inplace( diff * (10/len) )
+						self.influenceVecs.cohesion:sum_inplace( diff /len  )
 					end
 					if len < 500 then
 						-- influences alignment
 						assert(ent.ai, "Entity doesn't have an individual mind.")
 						sumFwd = ent.ai.forward + sumFwd
-						numAngles = numAngles + 1
+						numFriendsNearby = numFriendsNearby + 1
 					end
 				else
 					if len < 500 then
@@ -87,6 +105,7 @@ IndividualMind = Class {
 				end
 			elseif ent.entitytype == "wall" and len < 40 then
 				local arg = -diff * (5/len)
+				self.numwalls = self.numwalls + 1
 				local vec = Vector(arg.x, arg.y)
 				self.influenceVecs.wallSeparation:sum_inplace( vec )
 			elseif ent.entitytype == "hero" and len < 1000 then
@@ -95,19 +114,19 @@ IndividualMind = Class {
 				--self.influenceVecs.separation:sum_inplace( vec )
 			end
 		end
+
 		local avgFwd = sumFwd
-		--self.pawn.ai.forward = pawn.ai.globalmind.hero.pos - pawn.pos
-		
-		--self.pawn.ai.forward:sum_inplace(
-		self.pawn.ai.forward:sum_inplace(self.influenceVecs.friendSeparation * 20 )
-		self.pawn.ai.forward:sum_inplace(self.influenceVecs.cohesion * 0.1)
 		self.influenceVecs.alignment = avgFwd
-		--self.pawn.ai.forward:sum_inplace(self.influenceVecs.alignment)
+		self.forward.x, self.forward.y = 0, 0
+		self.forward:sum_inplace(self.influenceVecs.friendSeparation * self.influenceWeight.friendSeparation )
+		self.forward:sum_inplace(self.influenceVecs.wallSeparation * self.influenceWeight.wallSeparation)
+		self.forward:sum_inplace(self.influenceVecs.cohesion * self.influenceWeight.cohesion)
+		self.forward:sum_inplace(self.influenceVecs.alignment * self.influenceWeight.alignment)
 		local objective = self.globalmind.hero.pos - self.pawn.pos
-		objective = objective *  (10/objective:len())
-		self.pawn.ai.forward:sum_inplace(objective)
-		self.pawn.ai.forward:sum_inplace(self.influenceVecs.wallSeparation)
-		self.pawn.ai.forward:trim_inplace(1)
+		objective = objective /objective:len()
+		self.forward:sum_inplace(objective * self.influenceWeight.objective)
+		--self.accumForward:sum_inplace(self.forward)
+		self.forward:trim_inplace(1)
 		-- apply separation, cohesion and alignment
 	end,
 
@@ -117,7 +136,6 @@ IndividualMind = Class {
 		for k,v in pairs(self.influenceVecs) do
 			fwd = self.pawn.pos + v * 20
 			love.graphics.line(self.pawn.pos.x, self.pawn.pos.y, fwd.x, fwd.y)
-
 		end
 	end,
 

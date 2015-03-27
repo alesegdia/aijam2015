@@ -249,4 +249,5 @@ function Game:draw()
   gui.core.draw()
   love.graphics.setColor({255,0,0,255})
   love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 50)
+  love.graphics.print("Num walls detected by swarm: " ..tostring(swarm.numwalls), 10, 100)
 end
