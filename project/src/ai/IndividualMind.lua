@@ -34,8 +34,6 @@ IndividualMind = Class {
 		self.globalmind = globalmind
 		self.pawn = pawn
 		self.forward = Vector(0,0)
-		self.thurst = 250
-		self.steer = 0
 
 		self.pawn.ai = self
 
@@ -45,7 +43,7 @@ IndividualMind = Class {
 		-- * Cohesión (giro hacia la posición media)
 		-- * Objetivo Hero?
 
-		self.influenceWeight = self.formations.ambush(250)
+		self.params = self.formations.ambush(250)
 		self.influenceVecs = {
 			friendSeparation = Vector(0,0),
 			wallSeparation = Vector(0,0),
@@ -55,15 +53,8 @@ IndividualMind = Class {
 		}
 	end,
 
-	resetSteer = function(self)
-		self.steer = 0
-	end,
-
-	applySteer = function(self)
-	end,
-
 	controller = function(pawn)
-		pawn.physicbody:setLinearVelocity(pawn.ai.forward.x * pawn.ai.thurst, pawn.ai.forward.y * pawn.ai.thurst)
+		pawn.physicbody:setLinearVelocity(pawn.ai.forward.x * pawn.ai.params.thurst, pawn.ai.forward.y * pawn.ai.params.thurst)
 	end,
 
 	resetInfluence = function(self)
@@ -73,7 +64,6 @@ IndividualMind = Class {
 	end,
 
 	computeInfluence = function(self)
-		self:resetSteer()
 		self:resetInfluence()
 		self.perceived = {}
 		-- perform raycast
@@ -118,13 +108,13 @@ IndividualMind = Class {
 		local avgFwd = sumFwd
 		self.influenceVecs.alignment = avgFwd
 		self.forward.x, self.forward.y = 0, 0
-		self.forward:sum_inplace(self.influenceVecs.friendSeparation * self.influenceWeight.friendSeparation )
-		self.forward:sum_inplace(self.influenceVecs.wallSeparation * self.influenceWeight.wallSeparation)
-		self.forward:sum_inplace(self.influenceVecs.cohesion * self.influenceWeight.cohesion)
-		self.forward:sum_inplace(self.influenceVecs.alignment * self.influenceWeight.alignment)
+		self.forward:sum_inplace(self.influenceVecs.friendSeparation * self.params.friendSeparation )
+		self.forward:sum_inplace(self.influenceVecs.wallSeparation * self.params.wallSeparation)
+		self.forward:sum_inplace(self.influenceVecs.cohesion * self.params.cohesion)
+		self.forward:sum_inplace(self.influenceVecs.alignment * self.params.alignment)
 		local objective = self.globalmind.hero.pos - self.pawn.pos
 		objective = objective /objective:len()
-		self.forward:sum_inplace(objective * self.influenceWeight.objective)
+		self.forward:sum_inplace(objective * self.params.objective)
 		--self.accumForward:sum_inplace(self.forward)
 		self.forward:trim_inplace(1)
 		-- apply separation, cohesion and alignment
@@ -137,9 +127,6 @@ IndividualMind = Class {
 			fwd = self.pawn.pos + v * 20
 			love.graphics.line(self.pawn.pos.x, self.pawn.pos.y, fwd.x, fwd.y)
 		end
-	end,
-
-	decideSteerBasedOnInfluence = function(self)
-	
 	end
+
 }

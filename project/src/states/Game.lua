@@ -16,6 +16,7 @@ require "src.entities.PhysicWorld"
 require "src.entities.Hero"
 require "src.entities.Zombie"
 require "src.entities.Bullet"
+local Vision = require "src.misc.Vision"
 local MapGen = require 'src.mapgen.MapGen'
 
 Game = Gamestate.new()
@@ -169,7 +170,8 @@ local aisliders = {
 	wallSeparationSlider = { value = 5, min = 0.5, max = 20 },
 	alignmentSlider = { value = 10, min = 0.5, max = 20 },
 	cohesionSlider = { value = 1, min = 0.5, max = 20 },
-	objectiveSlider = { value = 1, min = 0.5, max = 20 },
+	objectiveSlider = { value = 1, min = 0, max = 20 },
+	thurstSlider = { value = 250, min = 50, max = 500 }
 }
 
 function Game:enter()
@@ -184,7 +186,7 @@ function Game:enter()
 	anim:addFrame(0,0,1600,1280,1)
 	buildMap()
 	spawnZombieSwarm(map.size.w/2 * 128, map.size.h/2*128,30,"ZomboidTeam", 100)
-
+	Vision:init(stage, hero, false)
 	--[[
 	for i=1,100 do
 		spawnZombieWithDirectController(hero.pos.x+50,hero.pos.y+50)
@@ -194,6 +196,7 @@ end
 
 
 function Game:update( dt )
+	Vision:computeVision()
 	timer.update(dt)
 	stage:update(dt)
 	swarm:step()
@@ -210,15 +213,20 @@ function Game:update( dt )
 		gui.Slider{ info = aisliders.wallSeparationSlider }
     	gui.Label{ text="alignment", pos={0, 0}}
 		gui.Slider{ info = aisliders.alignmentSlider }
+    	gui.Label{ text="cohesion", pos={0, 0}}
+		gui.Slider{ info = aisliders.cohesionSlider }
     	gui.Label{ text="objective", pos={0, 0}}
 		gui.Slider{ info = aisliders.objectiveSlider }
+    	gui.Label{ text="thurst", pos={0, 0}}
+		gui.Slider{ info = aisliders.thurstSlider }
 		if gui.Button{text = "Apply!"} then
 			swarm:updateAllParams({
 				wallSeparation = aisliders.wallSeparationSlider.value,
 				alignment = aisliders.alignmentSlider.value,
 				cohesion = aisliders.cohesionSlider.value,
 				objective = aisliders.objectiveSlider.value,
-				friendSeparation = aisliders.friendSeparationSlider.value
+				friendSeparation = aisliders.friendSeparationSlider.value,
+				thurst = aisliders.thurstSlider.value,
 			})
 		end
 		if gui.Button{text = "Respawn!"} then
@@ -273,6 +281,7 @@ function Game:draw()
 		--love.graphics.line(v.o.x, v.o.y, v.dir.x , v.dir.y)
 	  --end
 	  debugRays = {}
+  Vision:draw()
   end)
 
   love.graphics.setFont(smallFont)

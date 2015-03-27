@@ -10,7 +10,7 @@ GlobalMind = Class {
 
 	updateAllParams = function(self, params)
 		for k,v in pairs(self.minions) do
-			v.influenceWeight = params
+			v.params = params
 		end
 	end,
 
@@ -32,8 +32,6 @@ GlobalMind = Class {
 		local todel = {}
 		for k,individual in pairs(self.minions) do
 			individual:computeInfluence()
-			individual:decideSteerBasedOnInfluence()
-			individual:applySteer()
 			self.numwalls = self.numwalls + individual.numwalls
 			--individual.pawn.physicbody:setLinearVelocity()
 			if individual.pawn.dead then
