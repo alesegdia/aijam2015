@@ -286,6 +286,8 @@ function Game:draw()
 		--love.graphics.line(v.o.x, v.o.y, v.dir.x , v.dir.y)
 	  --end
 	  debugRays = {}
+	  love.graphics.setColor(255,0,255,255)
+	  love.graphics.point(hero.pos.x, hero.pos.y)
   end)
 
   love.graphics.setBlendMode('alpha')
