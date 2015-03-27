@@ -8,6 +8,7 @@ local camera = require (LIBRARYPATH.."hump.camera")
 timer = require (LIBRARYPATH.."hump.timer")
 local Vector        = require (LIBRARYPATH.."hump.vector"	)
 local tween         = timer.tween
+local gui = require (LIBRARYPATH.."Quickie")
 
 require "src.entities.Stage"
 require "src.entities.GameEntity"
@@ -163,6 +164,14 @@ tefunc = function()
 	spawnBloodParticle(hero.pos.x, hero.pos.y, 2, 1)
 end
 
+local aisliders = {
+	friendSeparationSlider = { value = 5, min = 0.5, max = 20, pos = {100, 200} },
+	wallSeparationSlider = { value = 5, min = 0.5, max = 20 },
+	alignmentSlider = { value = 10, min = 0.5, max = 20 },
+	cohesionSlider = { value = 1, min = 0.5, max = 20 },
+	objectiveSlider = { value = 1, min = 0.5, max = 20 },
+}
+
 function Game:enter()
 	for k,v in pairs(stage.objects) do
 		v.dead = true
@@ -194,6 +203,28 @@ function Game:update( dt )
 		timer.clear()
 		Gamestate.switch(Menu)
 	end
+    gui.group.push{grow = "down", pos = {20, 200}}
+    	gui.Label{ text="friend separation", pos={0, 0}}
+		gui.Slider{ info = aisliders.friendSeparationSlider }
+    	gui.Label{ text="wall separation", pos={0, 0}}
+		gui.Slider{ info = aisliders.wallSeparationSlider }
+    	gui.Label{ text="alignment", pos={0, 0}}
+		gui.Slider{ info = aisliders.alignmentSlider }
+    	gui.Label{ text="objective", pos={0, 0}}
+		gui.Slider{ info = aisliders.objectiveSlider }
+		if gui.Button{text = "Apply!"} then
+			swarm:updateAllParams({
+				wallSeparation = aisliders.wallSeparationSlider.value,
+				alignment = aisliders.alignmentSlider.value,
+				cohesion = aisliders.cohesionSlider.value,
+				objective = aisliders.objectiveSlider.value,
+				friendSeparation = aisliders.friendSeparationSlider.value
+			})
+		end
+		if gui.Button{text = "Respawn!"} then
+			spawnZombieSwarm(map.size.w/2 * 128, map.size.h/2*128,30,"ZomboidTeam", 100)
+		end
+    gui.group.pop()
 end
 
 local mouseData = {

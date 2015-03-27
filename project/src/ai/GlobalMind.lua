@@ -8,6 +8,12 @@ GlobalMind = Class {
 
 	minions = {},
 
+	updateAllParams = function(self, params)
+		for k,v in pairs(self.minions) do
+			v.influenceWeight = params
+		end
+	end,
+
 	init = function(self, hero, zombies, teamid)
 		self.teamid = teamid
 		self.hero = hero
