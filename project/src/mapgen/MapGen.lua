@@ -13,6 +13,35 @@ local makeRoom3 = require "rooms.Room3"
 
 local MapGen = {
 
+	getDoors = function(map)
+		local doors  = {}
+		for i=1,#map do
+			local row = map[i]
+			for j=1,#row do
+				if map[i][j] == 3 then
+					table.insert(doors, { i, j })
+				end
+			end
+		end
+		return doors
+	end,
+
+	dumpMap = function(src, target, where)
+		applyMap(where, function(dx, dy, userdata)
+		end)
+	end,
+
+	applyMap = function(src, target, where, func)
+		local obj = {}
+		for i1=1,#src do
+			local row = src[i1]
+			for j1=1,#row do
+				func(i1 + where.x, j1 + where.y, obj)
+			end
+		end
+		return obj
+	end,
+
 	buildEmptyMap = function(width, height)
 		local map = {}
 		for i = 1,width do
@@ -62,12 +91,7 @@ local MapGen = {
 			end
 		end
 
-		local themap = {
-			data = map,
-			size = { w = width, h = height }
-		}
-
-		return themap
+		return map
 	end
 }
 

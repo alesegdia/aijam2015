@@ -116,9 +116,9 @@ end
 local map = MapGen:generate(25,20)
 local lastWallID = -1
 local buildMap = function()
-	for i=1,map.size.w do
-		for j=1,map.size.h do
-			if map.data[i][j] == 0 then
+	for i=1,#map do
+		for j=1,#map[1] do
+			if map[i][j] == 0 then
 				local phb = stage.physicworld:createRectangleBody(i * 128 + 64,j * 128 + 64,128,128,0,"static")
 				local posx, posy = phb:getPosition()
 				local data = { entitytype = "wall", id=lastWallID, pos=Vector(posx, posy) }
@@ -180,12 +180,12 @@ function Game:enter()
 	end
 	local anim = newAnimation(Image.map8x, 1600, 1280, 1, 1)
 	--GameEntity(stage,0,0,anim,nil)
-	hero = Hero(stage,map.size.w/2 * 128,map.size.h/2 * 128,world)
+	hero = Hero(stage,#map/2 * 128,#map[1]/2 * 128,world)
 	timer.add(2, tefunc)
 	--spawnBloodParticle(hero.pos.x, hero.pos.y, 1, 1)
 	anim:addFrame(0,0,1600,1280,1)
 	buildMap()
-	spawnZombieSwarm(map.size.w/2 * 128, map.size.h/2*128,30,"ZomboidTeam", 100)
+	spawnZombieSwarm(#map/2 * 128, #map[1]/2*128,30,"ZomboidTeam", 100)
 	Vision:init(stage, hero, false)
 	--[[
 	for i=1,100 do
@@ -270,10 +270,10 @@ function Game:draw()
   cam:draw( function()
 	local tilesize = 128
 	  love.graphics.setColor(0x9b,0xad,0xb7,255)
-  	  love.graphics.rectangle("fill", 0, 0, map.size.w * tilesize, map.size.h * tilesize)
-	  for i=1,map.size.w do
-		  for j=1,map.size.h do
-			  if map.data[i][j] == 0 then
+  	  love.graphics.rectangle("fill", 0, 0, #map * tilesize, #map[1] * tilesize)
+	  for i=1,#map do
+		  for j=1,#map[1] do
+			  if map[i][j] == 0 then
 				  --love.graphics.setColor(0x3f,0x3f,0x74,255)
 				  love.graphics.setColor(0,0,0,255)
 				  love.graphics.rectangle("fill", i * tilesize, j * tilesize, tilesize, tilesize)
