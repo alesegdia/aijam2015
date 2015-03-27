@@ -113,7 +113,7 @@ local spawnZombieSwarm = function(x,y,howmany,teamid,spread)
 	end
 end
 
-local map = MapGen(25,20)
+local map = MapGen:generate(25,20)
 local lastWallID = -1
 local buildMap = function()
 	for i=1,map.size.w do

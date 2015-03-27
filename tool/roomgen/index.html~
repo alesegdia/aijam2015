@@ -1,0 +1,233 @@
+
+<body>
+<script type="application/javascript" src="jquery-2.1.3.min.js"></script>
+
+<div class="row">
+		<label>JSON file:</label><br/>
+		<input type="file" id="jsonLoader" name="jsonLoader"/>
+		<br />
+		<br />
+
+		Map width: <input type="text" id="map-width" />
+		<br />
+		Map height: <input type="text" id="map-height" />
+		<br />
+		<button onclick="mapSizeChange();">Change map size</button>
+		<br />
+		<br />
+
+		Select tile type: 
+		<select id="tile-selector" onchange="changeTile();">
+			<option selected value="1">Wall</option>
+			<option value="0">Free</option>
+			<option value="2">Used</option>
+			<option value="3">Door</option>
+		</select>
+		<br />
+		<br />
+
+		<button onclick="saveJsonToFile()">Save data to JSON!</button>
+		<br />
+		<br />
+		<canvas id="imageCanvas"></canvas>
+		<br />
+</div>
+<script type="application/javascript">
+
+var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+    // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
+var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
+var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+    // At least Safari 3+: "[object HTMLElementConstructor]"
+var isChrome = !!window.chrome && !isOpera;              // Chrome 1+
+var isIE = /*@cc_on!@*/false || !!document.documentMode; // At least IE6
+
+var current_map = null;
+var tile_size = 32;
+var selected_tile = 0;
+
+var mapSizeChange = function()
+{
+	var width = $("#map-width").val();
+	var height = $("#map-height").val();
+	generateMap(parseInt(width), parseInt(height));
+}
+
+var changeTile = function()
+{
+	selected_tile = parseInt($("#tile-selector").val());
+}
+
+changeTile();
+
+var generateMap = function(width, height)
+{
+	current_map = new Array(height);
+	for( var i = 0; i < current_map.length; i++ )
+	{
+		current_map[i] = new Array(width);
+		for( var j = 0; j < current_map[i].length; j++ )
+		{
+			current_map[i][j] = 0;
+		}
+	}
+	var canvas = document.getElementById("imageCanvas");
+	canvas.width = current_map[0].length * tile_size;
+	canvas.height = current_map.length * tile_size;
+}
+
+generateMap(32, 32);
+
+requestAnimFrame = (function() {
+  return window.requestAnimationFrame ||
+     window.webkitRequestAnimationFrame ||
+     window.mozRequestAnimationFrame ||
+     window.oRequestAnimationFrame ||
+     window.msRequestAnimationFrame ||
+     function(/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
+       window.setTimeout(callback, 1000/30);
+     };
+})();
+
+var jsonLoader = document.getElementById('jsonLoader');
+jsonLoader.addEventListener('change', handleJson, false);
+
+var canvas = document.getElementById('imageCanvas');
+var ctx = canvas.getContext('2d');
+
+function handleJson(e){
+	var reader = new FileReader();
+	reader.onload = function(event){
+		var data = eval("(" + window.atob(event.target.result.split(',')[1]) + ")");
+		generateMap(data["size"][0], data["size"][1]);
+		var j = 0;
+		var index = 0;
+		for( var i = 0; i < current_map.length; i++ )
+		{
+			for( var j = 0; j < current_map[i].length; j++ )
+			{
+				current_map[i][j] = data.data[index];
+				index++;
+			}
+		}
+	}
+	reader.readAsDataURL(e.target.files[0]);
+}
+
+var mouse_pos = {x: 0, y: 0};
+
+var getMousePos = function(canvas, evt)
+{
+	var rect = canvas.getBoundingClientRect();
+	return {
+		x: evt.clientX - rect.left,
+		y: evt.clientY - rect.top
+	};
+}
+
+var mouse_down = false;
+
+var tryPlaceTileAtMouse = function()
+{
+	var xtile = Math.floor(mouse_pos.x/tile_size);
+	var ytile = Math.floor(mouse_pos.y/tile_size);
+	if( xtile > 0 && xtile < current_map[0].length &&
+		ytile > 0 && ytile < current_map.length )
+	{
+		current_map[ytile][xtile] = selected_tile;
+	}
+}
+
+canvas.addEventListener("mousemove", function(evt) {
+	mouse_pos = getMousePos(canvas, evt);
+	if( mouse_down )
+	{
+		tryPlaceTileAtMouse();
+	}
+}, false);
+
+
+canvas.addEventListener("mousedown", function(event) {
+	mouse_down = true;
+	tryPlaceTileAtMouse();
+}, false);
+
+canvas.addEventListener("mouseup", function(event) {
+	mouse_down = false;
+}, false);
+
+
+var render = function()
+{
+	ctx.fillStyle = "rgb(255,200,200)";
+	ctx.fillRect(0,0,canvas.width, canvas.height);
+
+	if( current_map != null )
+	{
+		for( var i = 0; i < current_map.length; i++ )
+		{
+			for( var j = 0; j < current_map[i].length; j++ )
+			{
+				var tile = current_map[i][j];
+				switch( tile ) {
+					case 0:
+						ctx.fillStyle = "rgb(128, 192, 255)";
+						break;
+					case 1:
+						ctx.fillStyle = "rgb(128, 64, 32)";
+						break;
+					case 2:
+						ctx.fillStyle = "rgb(64, 128, 64)";
+						break;
+					case 3:
+						ctx.fillStyle = "rgb(200, 200, 32)";
+						break;
+				}
+				ctx.fillRect(j * tile_size, i * tile_size, tile_size, tile_size);
+			}
+		}
+	}
+
+	ctx.fillRect(0,0,32,32);
+	requestAnimFrame(render);
+}
+
+var serializeMap = function()
+{
+	var tiles = [];
+	var luagenmap = "return function()\n" +
+			"\treturn {\n" +
+			"\t\tdata = {\n";
+
+
+	for( var i = 0; i < current_map.length; i++ )
+	{
+		var row = "{ ";
+		for( var j = 0; j < current_map[i].length; j++ )
+		{
+			row += current_map[i][j] + ", ";
+		}
+		luagenmap += row + " },\n";
+	}
+
+	luagenmap += "}\n";
+
+	return luagenmap;
+	return {
+		"size": [ current_map[0].length, current_map.length ],
+		"data": tiles
+	};
+}
+
+var saveJsonToFile = function()
+{
+	var url = 'data:text/plain;charset=utf8,' + encodeURIComponent(serializeMap());
+	window.open(url, '_blank');
+	window.focus();
+}
+
+
+
+requestAnimFrame(render);
+</script>
+</body>
