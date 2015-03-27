@@ -71,8 +71,10 @@ Vision = {
 	visionShader = love.graphics.newShader( [[
 		vec4 effect( vec4 color, Image texture, vec2 texcoords, vec2 screencoords )
 		{
-			vec4 col;
-			return col;
+			vec4 c = Texel(texture, texcoords);
+			if( c == vec4(1,1,1,1) ) return vec4(0,0,0,0);
+			//else return vec4(0.247, 0.247, 0.455, 1);
+			else return vec4(0,0,0,1);
 		}
 
 	]])

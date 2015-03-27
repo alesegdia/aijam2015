@@ -255,8 +255,12 @@ end
 
 debugRays = {}
 
+local visioncanvas = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+local scenecanvas = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
+local finalcanvas = love.graphics.newCanvas(love.window.getWidth(),love.window.getHeight())
 
 function Game:draw()
+	love.graphics.setCanvas(scenecanvas)
   love.graphics.setColor({255,255,255,255})
   camshake = camshake * 0.9
   cam:lookAt(
@@ -270,7 +274,8 @@ function Game:draw()
 	  for i=1,map.size.w do
 		  for j=1,map.size.h do
 			  if map.data[i][j] == 0 then
-				  love.graphics.setColor(0x3f,0x3f,0x74,255)
+				  --love.graphics.setColor(0x3f,0x3f,0x74,255)
+				  love.graphics.setColor(0,0,0,255)
 				  love.graphics.rectangle("fill", i * tilesize, j * tilesize, tilesize, tilesize)
 			  end
 		  end
@@ -281,9 +286,21 @@ function Game:draw()
 		--love.graphics.line(v.o.x, v.o.y, v.dir.x , v.dir.y)
 	  --end
 	  debugRays = {}
-  Vision:draw()
   end)
 
+  love.graphics.setBlendMode('alpha')
+  love.graphics.setCanvas(visioncanvas)
+  cam:draw( function() Vision:draw() end )
+
+  love.graphics.setCanvas(finalcanvas)
+  love.graphics.setShader()
+  love.graphics.draw(scenecanvas)
+  love.graphics.setShader(Vision.visionShader)
+  love.graphics.draw(visioncanvas)
+  love.graphics.setShader()
+  love.graphics.setCanvas()
+
+  love.graphics.draw(finalcanvas)
   love.graphics.setFont(smallFont)
   love.graphics.setColor(color)
   gui.core.draw()
