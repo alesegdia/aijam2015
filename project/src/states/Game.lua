@@ -174,7 +174,7 @@ function Game:enter()
 	--spawnBloodParticle(hero.pos.x, hero.pos.y, 1, 1)
 	anim:addFrame(0,0,1600,1280,1)
 	buildMap()
-	spawnZombieSwarm(map.size.w/2 * 128, map.size.h/2*128,1,"ZomboidTeam", 100)
+	spawnZombieSwarm(map.size.w/2 * 128, map.size.h/2*128,30,"ZomboidTeam", 100)
 
 	--[[
 	for i=1,100 do
@@ -237,10 +237,10 @@ function Game:draw()
 		  end
 	  end
 	  stage:draw()
-	  swarm:debugDraw()
-	  for k,v in pairs(debugRays) do
+	  --swarm:debugDraw()
+	  --for k,v in pairs(debugRays) do
 		--love.graphics.line(v.o.x, v.o.y, v.dir.x , v.dir.y)
-	  end
+	  --end
 	  debugRays = {}
   end)
 

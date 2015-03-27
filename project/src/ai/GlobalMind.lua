@@ -21,10 +21,12 @@ GlobalMind = Class {
 	step = function(self)
 		self.lastguyindex = (self.lastguyindex+1) % #self.minions + 1
 		local individual = self.minions[self.lastguyindex]
+		for k,individual in pairs(self.minions) do
 			individual:computeInfluence()
 			individual:decideSteerBasedOnInfluence()
 			individual:applySteer()
 			--individual.pawn.physicbody:setLinearVelocity()
+		end
 	end,
 
 	debugDraw = function(self)

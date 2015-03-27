@@ -65,11 +65,12 @@ PhysicWorld = Class {
 
   -- returns elements in area
   raycastZombiePerception = function( self, zombie, dir, numRays )
+  	  numRays = 30
   	  local coneAngle = 360
   	  local anglestep = coneAngle / numRays
   	  local neighboors = {}
   	  for i=-coneAngle/2,coneAngle/2,anglestep do
-  	  	  local rh = self:raycast( zombie.pos, Vector(1,0), i, 1000, zombie, RC_nearest_PERC )
+  	  	  local rh = self:raycast( zombie.pos, Vector(1,0), i, 500, zombie, RC_nearest_PERC )
   	  	  if rh.lastent ~= nil and rh.lastent ~= zombie then
   	  	  	  local obj = { point = Vector(rh.x, rh.y), ent = rh.lastent }
 			neighboors[rh.lastent.id] = obj
@@ -83,13 +84,14 @@ PhysicWorld = Class {
   	  ignore = ignore or {}
 	  angle = angle or 0
 	  raymod = raymod or 2000
-	  print("raymod", raymod)
 	  local v = base + dir:rotated(angle) * raymod
 		table.insert(debugRays, {o = base, dir = v})
 	  local rayhit = { x=0,y=0,xn=0,yn=0,fix=nil }
 	  --print("vx: " .. angle) -- base.x)
 	  --print("vy: " .. base.y)
-	  self.w:rayCast(base.x, base.y, v.x,v.y,func(rayhit, ignore))
+	  if base:dist2(v) > 0 then
+		self.w:rayCast(base.x, base.y, v.x,v.y,func(rayhit, ignore))
+	end
 	  return rayhit
   end,
 

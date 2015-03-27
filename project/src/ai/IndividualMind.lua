@@ -9,7 +9,7 @@ IndividualMind = Class {
 	init = function(self, globalmind, pawn)
 		self.globalmind = globalmind
 		self.pawn = pawn
-		self.forward = Vector(1,0)
+		self.forward = Vector(0,0)
 		self.thurst = 100
 		self.steer = 0
 
@@ -28,7 +28,8 @@ IndividualMind = Class {
 			objective = 1
 		}
 		self.influenceVecs = {
-			separation = Vector(0,0),
+			friendSeparation = Vector(0,0),
+			wallSeparation = Vector(0,0),
 			alignment = Vector(0,0),
 			cohesion = Vector(0,0),
 			objective = Vector(0,0)
@@ -58,25 +59,25 @@ IndividualMind = Class {
 		self.perceived = {}
 		-- perform raycast
 		local physicsResult = self.pawn.stage.physicworld:raycastZombiePerception(self.pawn, self.forward, 360)
-		local sumAngle = 0
+		local sumFwd = Vector(0,0)
 		local numAngles = 0
 		for k, hit in pairs(physicsResult) do
 			local ent = hit.ent
 			local diff = hit.point - self.pawn.pos
 			local len = diff:len()
 			if ent.entitytype == "zombie" then
-				print("zombie")
-				if ent.teamid == self.globalmind.teamid then
-					if len < 200 then
+				if ent.ai.globalmind.teamid == self.globalmind.teamid then
+					if len < 50 then
 						-- influences friend separation
-						self.influenceVecs.separation.sum_inplace( -diff * (1/len) )
-					elseif len > 200 and len < 500 then
+						self.influenceVecs.friendSeparation:sum_inplace( -diff * (1/len) )
+					elseif len > 100 and len < 500 then
 						-- influences cohesion
+						self.influenceVecs.cohesion:sum_inplace( diff * (10/len) )
 					end
 					if len < 500 then
 						-- influences alignment
 						assert(ent.ai, "Entity doesn't have an individual mind.")
-						sumAngle = sumAngle + ent.physicbody:getAngle()
+						sumFwd = ent.ai.forward + sumFwd
 						numAngles = numAngles + 1
 					end
 				else
@@ -84,23 +85,28 @@ IndividualMind = Class {
 						-- influences strange zombie separation
 					end
 				end
-			elseif ent.entitytype == "wall" and len < 100 then
-				print(ent.entitytype, "is near")
-				local arg = -diff * (0.5/len)
+			elseif ent.entitytype == "wall" and len < 40 then
+				local arg = -diff * (5/len)
 				local vec = Vector(arg.x, arg.y)
-				self.influenceVecs.separation:sum_inplace( vec )
+				self.influenceVecs.wallSeparation:sum_inplace( vec )
 			elseif ent.entitytype == "hero" and len < 1000 then
-				print(ent.entitytype, "is near")
-				local arg = diff * (1/len)
+				local arg = diff * (20/len)
 				local vec = Vector(arg.x, arg.y)
-				self.influenceVecs.separation:sum_inplace( vec )
+				--self.influenceVecs.separation:sum_inplace( vec )
 			end
 		end
-		local avgAngle = sumAngle / numAngles
+		local avgFwd = sumFwd
 		--self.pawn.ai.forward = pawn.ai.globalmind.hero.pos - pawn.pos
 		
 		--self.pawn.ai.forward:sum_inplace(
-		self.pawn.ai.forward:sum_inplace(self.influenceVecs.separation)
+		self.pawn.ai.forward:sum_inplace(self.influenceVecs.friendSeparation * 20 )
+		self.pawn.ai.forward:sum_inplace(self.influenceVecs.cohesion * 0.1)
+		self.influenceVecs.alignment = avgFwd
+		--self.pawn.ai.forward:sum_inplace(self.influenceVecs.alignment)
+		local objective = self.globalmind.hero.pos - self.pawn.pos
+		objective = objective *  (10/objective:len())
+		self.pawn.ai.forward:sum_inplace(objective)
+		self.pawn.ai.forward:sum_inplace(self.influenceVecs.wallSeparation)
 		self.pawn.ai.forward:trim_inplace(1)
 		-- apply separation, cohesion and alignment
 	end,
