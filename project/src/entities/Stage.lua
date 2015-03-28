@@ -42,6 +42,7 @@ Stage = Class{
 		end
 	end,
 	draw = function(self)
+		love.graphics.setColor(255,255,255,255)
 		for i,v in ipairs(self.objects) do
 			v:draw()
 		end

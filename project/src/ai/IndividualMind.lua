@@ -51,6 +51,28 @@ IndividualMind = Class {
 			cohesion = Vector(0,0),
 			objective = Vector(0,0)
 		}
+
+		self.attack = {
+			nextAttack = love.timer.getTime(),
+			attackRate = 0.3,
+			damageDealt = 1,
+		}
+	end,
+
+	resolveAttack = function(self)
+		local v2p = (self.globalmind.hero.pos - self.pawn.pos)
+		if love.timer.getTime() > self.attack.nextAttack then
+			self.attack.nextAttack = love.timer.getTime() + self.attack.attackRate
+			if v2p:len() < 50 then
+				local hitplayer = self.pawn.stage.physicworld:raycastToPlayer(self.pawn, v2p)
+				if hitplayer then
+					love.audio.play(Sfx.Hit_Hurt3)
+					self.globalmind.hero.health = self.globalmind.hero.health - self.attack.damageDealt
+					SpawnFourBloodParticle(self.globalmind.hero.pos)
+					self.globalmind.hero.isHurting = self.globalmind.hero.isHurting - 50
+				end
+			end
+		end
 	end,
 
 	controller = function(pawn)
@@ -64,6 +86,7 @@ IndividualMind = Class {
 	end,
 
 	computeInfluence = function(self)
+		self:resolveAttack()
 		self:resetInfluence()
 		self.perceived = {}
 		-- perform raycast

@@ -19,6 +19,7 @@ Hero = Class {
   	self.deltaboing = Vector(0,0)
 	phb:setUserData(self)
 	self.lastBoingFinished = true
+	self.isHurting = 255
   	return self
   end,
   input = {
@@ -80,9 +81,20 @@ Hero = Class {
 		self:shoot(vec.x * speed, vec.y * speed)
 	end
 
+  	  if self.isHurting < 255 then
+  	  	  self.isHurting = self.isHurting+5
+	  end
 	GameEntity.update(self,dt)
 	self.pos.x = self.pos.x + self.deltaboing.x
 	self.pos.y = self.pos.y + self.deltaboing.y
+  end,
+
+  draw = function(self)
+  	  if self.isHurting < 0 then self.isHurting = 0 end
+  	  if self.isHurting > 255 then self.isHurting = 255 end
+		love.graphics.setColor(255,self.isHurting,self.isHurting,255)
+	  GameEntity.draw(self)
+	  love.graphics.setColor(255,255,255,255)
   end,
 
   shoot = function(self, vx, vy)
@@ -93,10 +105,7 @@ Hero = Class {
 	  function(ent)
 		  ent.health = ent.health - 5
 		  if ent.health <= 0 then ent.dead = true end
-			spawnBloodParticle(ent.pos.x, ent.pos.y, -2, -1)
-			spawnBloodParticle(ent.pos.x, ent.pos.y, 2, -1)
-			spawnBloodParticle(ent.pos.x, ent.pos.y, -2, 1)
-			spawnBloodParticle(ent.pos.x, ent.pos.y, 2, 1)
+		  SpawnFourBloodParticle(ent.pos)
 	  end, self)
   	  --[[
 	  local finalpos = self.pos + Vector(0,0)

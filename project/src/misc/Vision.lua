@@ -67,10 +67,6 @@ Vision = {
 		for k,v in pairs(self.tris) do
 			love.graphics.polygon("fill",unpack(v))
 		end
-		love.graphics.setColor(255,0,255,255)
-		love.graphics.setPointSize(10)
-		love.graphics.point(self.originEntity.pos.x + self.tmpvec.x, self.originEntity.pos.y + self.tmpvec.y, 10)
-		love.graphics.setColor(255,255,255,255)
 		self.tris = {}
 	end,
 

@@ -167,6 +167,16 @@ tefunc = function()
 	spawnBloodParticle(hero.pos.x, hero.pos.y, 2, 1)
 end
 
+function SpawnFourBloodParticle(pos)
+	local myrand = function (spread)
+		return (love.math.random(spread)-spread/2)/10
+	end
+	--spawnBloodParticle(pos.x, pos.y, -2 + myrand(20), -1 + myrand(20))
+	spawnBloodParticle(pos.x, pos.y, 2 + myrand(20), -1 + myrand(20))
+	spawnBloodParticle(pos.x, pos.y, -2 + myrand(20), 1 + myrand(20))
+	spawnBloodParticle(pos.x, pos.y, 2 + myrand(20), 1 + myrand(20))
+end
+
 local aisliders = {
 	friendSeparationSlider = { value = 5, min = 0.5, max = 20, pos = {100, 200} },
 	wallSeparationSlider = { value = 5, min = 0.5, max = 20 },

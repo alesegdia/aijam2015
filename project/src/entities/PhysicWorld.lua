@@ -22,8 +22,8 @@ local RC_nearest = function( rh, ignore )
 	ignore = ignore or {}
   return function( fixture, x, y, xn, yn, fraction )
   	local userdata = fixture:getBody():getUserData()
-	rh.lastent = userdata
-	if rh.lastent ~= ignore then
+	if userdata ~= ignore then
+		rh.lastent = userdata
 		rh.x, rh.y, rh.xn, rh.yn = x, y, xn, yn
 		return fraction
 	else
@@ -47,6 +47,23 @@ PhysicWorld = Class {
 	self.w = love.physics.newWorld( gravx, gravy, true )
 	love.physics.setMeter( m2pix )
 	self.m2pix = m2pix
+  end,
+
+  raycastToPlayer = function(self, shooter, dir)
+	  local hit = self:raycast(shooter.pos, dir, 0, 1, shooter, function(rh, ignore)
+		  ignore = ignore or {}
+		  return function( fixture, x, y, xn, yn, fraction )
+			  local userdata = fixture:getBody():getUserData()
+			  if userdata ~= ignore then
+				  rh.x, rh.y, rh.xn, rh.yn = x, y, xn, yn
+				  rh.lastent = userdata
+				  return fraction
+			  else
+				  return -1
+			  end
+		  end
+	  end)
+	  return hit.lastent and hit.lastent.entitytype == "hero"
   end,
 
   -- FIX TO NOT DETECT ITSELF, SEND HERO

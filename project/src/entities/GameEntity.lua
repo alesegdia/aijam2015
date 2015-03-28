@@ -34,7 +34,6 @@ GameEntity = Class {
 	end,
 	draw = function(self)
 
-		love.graphics.setColor({255,255,255,255})
 		if self.anim then
 			local angle
 			if self.physicbody ~= nil then
