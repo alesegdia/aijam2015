@@ -23,6 +23,10 @@ Stage = Class{
 	register = function(self, obj)
 		self.objects[#self.objects+1] = obj
 	end,
+	reset = function(self)
+		self.objects = {}
+		self.physicworld:reset()
+	end,
 	update = function(self, dt)
 		self.physicworld.w:update(dt)
 		for i=#self.objects,1,-1 do

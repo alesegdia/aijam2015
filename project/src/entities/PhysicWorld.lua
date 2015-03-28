@@ -49,6 +49,12 @@ PhysicWorld = Class {
 	self.m2pix = m2pix
   end,
 
+  reset = function(self)
+	for k,v in pairs(self.w:getBodyList()) do
+		v:destroy()
+	end
+  end,
+
   raycastToPlayer = function(self, shooter, dir)
 	  local hit = self:raycast(shooter.pos, dir, 0, 1, shooter, function(rh, ignore)
 		  ignore = ignore or {}

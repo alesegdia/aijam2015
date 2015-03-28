@@ -15,7 +15,7 @@ Hero = Class {
   	self.shootRate = 0.2
   	self.nextShoot = love.timer.getTime() + self.shootRate
   	self.entitytype = "hero"
-  	self.health = 20
+  	self.health = 100
   	self.deltaboing = Vector(0,0)
 	phb:setUserData(self)
 	self.lastBoingFinished = true

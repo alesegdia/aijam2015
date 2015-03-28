@@ -20,6 +20,7 @@ local center = {
 local keyframe = 0
 local rects = {}
 function Menu:enter()
+	love.graphics.setColor(255,255,255,255)
 	table.insert(rects,{r ={570,570,200,30}, callback = function()Gamestate.switch(Game)end})
 	table.insert(rects,{r ={240,570,200,30}, callback = function()keyframe=5 end})
 	timer.add(1, function()

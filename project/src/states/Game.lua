@@ -190,6 +190,7 @@ function Game:enter()
 	for k,v in pairs(stage.objects) do
 		v.dead = true
 	end
+	stage:reset()
 	local anim = newAnimation(Image.map8x, 1600, 1280, 1, 1)
 	--GameEntity(stage,0,0,anim,nil)
 	local heropos = MapGen:getRandomValidTile(map)
@@ -203,6 +204,7 @@ function Game:enter()
 	pos.y = pos.y + 0.5
 	pos = MapGen:getRandomNearbyValidTile(map, hero.pos)
 	--spawnZombieSwarm(pos.x * 128, pos.y * 128,30,"ZomboidTeam", 100)
+	swarms = {}
 	table.insert(swarms, SpawnNearbySwarm())
 	table.insert(swarms, SpawnNearbySwarm())
 	Vision:init(stage, hero, false)
@@ -218,7 +220,12 @@ function SpawnNearbySwarm()
 	return spawnZombieSwarm(pos.x * 128, pos.y * 128,30,"ZomboidTeam", 100)
 end
 
+GUI_ENABLED = false
+
 function Game:update( dt )
+	if hero.health <= 0 then
+		Gamestate.switch(DeadScreen)
+	end
 	Vision:computeVision()
 	timer.update(dt)
 	stage:update(dt)
@@ -234,6 +241,7 @@ function Game:update( dt )
 
 	local x,y = hero.physicbody:getPosition()
 	cam:lookAt(x,y)
+	if GUI_ENABLED then
 	if gui.Button{text = "Go back"} then
 		timer.clear()
 		Gamestate.switch(Menu)
@@ -265,6 +273,7 @@ function Game:update( dt )
 			spawnZombieSwarm(#map/2 * 128, #map[1]/2*128,30,"ZomboidTeam", 100)
 		end
     gui.group.pop()
+end
 end
 
 local mouseData = {
@@ -348,5 +357,10 @@ function Game:draw()
   gui.core.draw()
   love.graphics.setColor({255,0,0,255})
   love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 50)
+  if GUI_ENABLED then
   love.graphics.print("Num walls detected by swarm: " ..tostring(swarm.numwalls), 10, 100)
+  end
+
+  love.graphics.setColor({140,0,0,255})
+  love.graphics.rectangle("fill", 100,700,hero.health* 8,20)
 end
