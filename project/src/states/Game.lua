@@ -100,6 +100,7 @@ local swarms = {}
 local spawnZombieSwarm = function(x,y,howmany,teamid,spread)
 	local zombies = {}
 	spread = spread or 1000
+	spread = 50
 	for i=1,howmany do
 		local px, py;
 		px = x + love.math.random() * spread
@@ -357,10 +358,14 @@ function Game:draw()
   gui.core.draw()
   love.graphics.setColor({255,0,0,255})
   love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 50)
+  love.graphics.print("KILLS: "..tostring(hero.kills), 10, 100)
   if GUI_ENABLED then
   love.graphics.print("Num walls detected by swarm: " ..tostring(swarm.numwalls), 10, 100)
   end
 
   love.graphics.setColor({140,0,0,255})
+  if hero.health < 0 then
+  	  hero.health = 0
+  end
   love.graphics.rectangle("fill", 100,700,hero.health* 8,20)
 end

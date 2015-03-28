@@ -55,7 +55,7 @@ IndividualMind = Class {
 		self.attack = {
 			nextAttack = love.timer.getTime(),
 			attackRate = 0.3,
-			damageDealt = 7,
+			damageDealt = 20,
 		}
 	end,
 

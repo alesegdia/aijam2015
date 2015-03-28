@@ -19,6 +19,7 @@ local center = {
 
 local bigFont   =   love.graphics.newFont(90)
 local smallFont =   love.graphics.newFont(32)
+local miniFont =   love.graphics.newFont(16)
 local keyframe = 0
 local rects = {}
 local canContinue = false
@@ -49,6 +50,8 @@ function DeadScreen:draw()
 			showClickText = not showClickText
 			nextClickText = love.timer.getTime() + clickTextRate
 		end
+			love.graphics.setFont(miniFont)
+		love.graphics.print("... but well, at least you killed "..tostring(hero.kills).." of those bastards.", 400, 400)
 		if showClickText then
 			love.graphics.setFont(smallFont)
 			love.graphics.print("Click to replay", 400, 500)

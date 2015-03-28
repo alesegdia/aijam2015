@@ -20,6 +20,7 @@ Hero = Class {
 	phb:setUserData(self)
 	self.lastBoingFinished = true
 	self.isHurting = 255
+	self.kills = 0
   	return self
   end,
   input = {
@@ -104,7 +105,10 @@ Hero = Class {
   	  self.stage.physicworld:raycastShotgun(self.pos, Vector(vx,vy), math.rad(20), 10,
 	  function(ent)
 		  ent.health = ent.health - 5
-		  if ent.health <= 0 then ent.dead = true end
+		  if not ent.dead and ent.health <= 0 then
+		  	  ent.dead = true
+		  	  self.kills = self.kills + 1
+		  	end
 		  SpawnFourBloodParticle(ent.pos)
 	  end, self)
   	  --[[
