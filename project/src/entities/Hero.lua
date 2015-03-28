@@ -86,6 +86,7 @@ Hero = Class {
   end,
 
   shoot = function(self, vx, vy)
+	love.audio.play(Sfx.Explosion22)
   	  self.physicbody:applyForce(-vx*50, -vy*50)
   	  camshake = camshake + 20
   	  self.stage.physicworld:raycastShotgun(self.pos, Vector(vx,vy), math.rad(20), 10,

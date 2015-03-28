@@ -72,7 +72,7 @@ end
 
 world.w:setCallbacks( beginContact, endContact, preSolve, postSolve )
 
-local hero = nil
+hero = nil
 local cam = camera.new(0,0,1,0)
 
 camshake = 0
@@ -183,7 +183,7 @@ function Game:enter()
 	local anim = newAnimation(Image.map8x, 1600, 1280, 1, 1)
 	--GameEntity(stage,0,0,anim,nil)
 	local heropos = MapGen:getRandomValidTile(map)
-	hero = Hero(stage,heropos.x * 128,heropos.y * 128,world)
+	hero = Hero(stage,(heropos.x + 0.5) * 128,(heropos.y+0.5) * 128,world)
 	timer.add(2, tefunc)
 	--spawnBloodParticle(hero.pos.x, hero.pos.y, 1, 1)
 	anim:addFrame(0,0,1600,1280,1)

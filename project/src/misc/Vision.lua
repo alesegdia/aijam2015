@@ -12,8 +12,8 @@ Vision = {
 	end,
 	computeVision = function(self)
 		local vision = {}
-		for i=1,360,1 do
-			local obj = self:Raycast(Vector(1,0), math.rad(i))
+		for i=1,360,5 do
+			local obj = self:Raycast(Vector(0,1), math.rad(i))
 			table.insert(vision, obj)
 		end
 		debug = debug or false
@@ -40,17 +40,19 @@ Vision = {
 		return function( fixture, x, y, xn, yn, fraction )
 			local userdata = fixture:getBody():getUserData()
 			if userdata.entitytype ~= "wall" then
-				return 1
+				return -1
 			end
 			rh.x, rh.y, rh.xn, rh.yn = x, y, xn, yn
 			return fraction
 		end
 	end,
 
+	tmpvec = Vector(0,-30),
+
 	Raycast = function( self, dir, angle )
 		angle = angle or 0
 		local v = dir:rotated(angle)
-		local base = self.originEntity.pos
+		local base = self.originEntity.pos + self.tmpvec
 		local rayhit = { x=0,y=0,xn=0,yn=0,fix=nil }
 		--print("vx: " .. angle) -- base.x)
 		--print("vy: " .. base.y)
@@ -65,6 +67,10 @@ Vision = {
 		for k,v in pairs(self.tris) do
 			love.graphics.polygon("fill",unpack(v))
 		end
+		love.graphics.setColor(255,0,255,255)
+		love.graphics.setPointSize(10)
+		love.graphics.point(self.originEntity.pos.x + self.tmpvec.x, self.originEntity.pos.y + self.tmpvec.y, 10)
+		love.graphics.setColor(255,255,255,255)
 		self.tris = {}
 	end,
 

@@ -39,6 +39,7 @@ end
 
 -- some standard proxies
 Image   = Proxy(function(k) return love.graphics.newImage('img/' .. k .. '.png') end)
+ImageJPG   = Proxy(function(k) return love.graphics.newImage('img/' .. k .. '.jpg') end)
 Sfx     = Proxy(function(k) return love.audio.newSource('sfx/' .. k .. '.ogg', 'static') end)
 Music   = Proxy(function(k) return love.audio.newSource('music/' .. k .. '.ogg', 'stream') end)
 
@@ -67,8 +68,14 @@ local function extractFileName(str)
 	return string.match(str, "(.-)([^\\/]-%.?([^%.\\/]*))$")
 end
 
+
+theme = love.audio.newSource("music/zomboidstheme.ogg", "stream")
+theme:setLooping(true)
+
+
 -- Initialization
 function love.load(arg)
+	theme:play()
 	math.randomseed(os.time())
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	-- love.mouse.setVisible(false)
