@@ -13,31 +13,56 @@ local makeRoom3 = require "rooms.Room3"
 
 local MapGen = {
 
-	getDoors = function(map)
+	getDoors = function(self, map)
+		return self:getTilesOfKind(map, 3)
+	end,
+
+	getUsed = function(self, map)
+		return self:getTilesOfKind(map, 2)
+	end,
+
+	getTilesOfKind = function(self, map, kind)
 		local doors  = {}
 		for i=1,#map do
 			local row = map[i]
 			for j=1,#row do
-				if map[i][j] == 3 then
-					table.insert(doors, { i, j })
+				if row[j] == kind then
+					table.insert(doors, { x=i, y=j })
 				end
 			end
 		end
 		return doors
 	end,
 
-	dumpMap = function(src, target, where)
-		applyMap(where, function(dx, dy, userdata)
+	dumpMap = function(self, src, target, where)
+		local obj = { should_break_loop = false }
+		local data = self.applyMap(src, target, where, obj, function(dx1, dy1, dx2, dy2, obj)
+			if src[dx1][dy1] ~= 0 then
+				target[dx2][dy2] = src[dx1][dy1]
+			end
 		end)
 	end,
 
-	applyMap = function(src, target, where, func)
-		local obj = {}
+	doesCollide = function(self, src, target, where)
+		local objj = { ret = false, should_break_loop = false }
+		local data = self.applyMap(src, target, where, objj, function(dx1, dy1, dx2, dy2, obj)
+			obj.ret = (target[dx2][dy2] ~= 0 and src[dx1][dy1] ~= 0)
+			if obj.ret then
+				obj.should_break_loop = true
+			end
+		end)
+		return objj.ret
+	end,
+
+	-- obj = { should_break_loop = false }
+	applyMap = function(src, target, where, obj, func)
 		for i1=1,#src do
 			local row = src[i1]
 			for j1=1,#row do
-				func(i1 + where.x, j1 + where.y, obj)
+				func(i1, j1, i1 + where.x, j1 + where.y, obj)
+				if obj.should_break_loop then break end
 			end
+			if obj.should_break_loop then break end
 		end
 		return obj
 	end,
@@ -92,6 +117,77 @@ local MapGen = {
 		end
 
 		return map
+	end,
+
+	tryWeldRoomInMap = function(self, room, map)
+		local roomDoors = self:getDoors(room)
+		local mapDoors = self:getDoors(map)
+		print(#roomDoors)
+		for i=1,#roomDoors do
+			print("elem", roomDoors[i].x, roomDoors[i].y)
+		end
+		local selected_door = nil
+		local selected_pos = nil
+		for _,roomDoor in pairs(roomDoors) do
+			if selected_door ~= nil then break end
+			for _,mapDoor in pairs(mapDoors) do
+				if selected_door ~= nil then break end
+				local deltas = { {1,0}, {0,1}, {-1,0}, {0,-1} }
+				while #deltas > 0 do
+					local rand = love.math.random(#deltas)
+					print("rand", rand)
+					print("#deltas", #deltas)
+					local obj = deltas[rand]
+					table.remove(deltas, rand)
+					local pos = { x = mapDoor.x - roomDoor.x + obj[1], y = mapDoor.y - roomDoor.y + obj[2] }
+					if not self:doesCollide(room, map, pos) then
+						self:dumpMap(room, map, pos)
+						selected_door = { mapDoor, roomDoor }
+						selected_pos = pos
+					end
+				end
+			end
+		end
+		map[selected_door[1].x][selected_door[1].y] = 2
+		map[selected_pos.x + selected_door[2].x][selected_pos.y + selected_door[2].y] = 2
+	end,
+
+	closeDoors = function(self, map)
+		local doors = self:getDoors(map)
+		for k,v in pairs(doors) do
+			map[v.x][v.y] = 1
+		end
+	end,
+
+	generate2 = function(self, width, height)
+		local bigmap = self.buildEmptyMap(128, 128)
+		local rm1 = makeRoom1()
+		print(self:doesCollide(rm1, bigmap, {x=1, y=1}))
+		local rm2 = makeRoom2()
+		print(#rm1)
+		self:dumpMap(rm1, bigmap, {x=20, y=20} )
+		print(self:doesCollide(rm1, bigmap, {x=1, y=1}))
+		print(self:doesCollide(rm1, bigmap, {x=20, y=20}))
+		self:tryWeldRoomInMap(rm2, bigmap)
+		for i=1,4 do
+			local rand = love.math.random()
+			local room = nil
+			if rand < 0.3333 then
+				room = makeRoom1()
+			elseif rand < 0.6666 then
+				room = makeRoom2()
+			else
+				room = makeRoom3()
+			end
+			self:tryWeldRoomInMap(room, bigmap)
+		end
+		self:closeDoors(bigmap)
+		return bigmap
+	end,
+
+	getRandomValidTile = function(self, map)
+		local tiles = self:getTilesOfKind(map, 2)
+		return tiles[love.math.random(#tiles)]
 	end
 }
 
