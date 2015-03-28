@@ -7,6 +7,7 @@
 -- 3 -> door
 --
 
+local Vector        = require (LIBRARYPATH.."hump.vector"	)
 local makeRoom1 = require "rooms.Room1"
 local makeRoom2 = require "rooms.Room2"
 local makeRoom3 = require "rooms.Room3"
@@ -122,10 +123,6 @@ local MapGen = {
 	tryWeldRoomInMap = function(self, room, map)
 		local roomDoors = self:getDoors(room)
 		local mapDoors = self:getDoors(map)
-		print(#roomDoors)
-		for i=1,#roomDoors do
-			print("elem", roomDoors[i].x, roomDoors[i].y)
-		end
 		local selected_door = nil
 		local selected_pos = nil
 		for _,roomDoor in pairs(roomDoors) do
@@ -135,8 +132,6 @@ local MapGen = {
 				local deltas = { {1,0}, {0,1}, {-1,0}, {0,-1} }
 				while #deltas > 0 do
 					local rand = love.math.random(#deltas)
-					print("rand", rand)
-					print("#deltas", #deltas)
 					local obj = deltas[rand]
 					table.remove(deltas, rand)
 					local pos = { x = mapDoor.x - roomDoor.x + obj[1], y = mapDoor.y - roomDoor.y + obj[2] }
@@ -162,12 +157,8 @@ local MapGen = {
 	generate2 = function(self, width, height)
 		local bigmap = self.buildEmptyMap(128, 128)
 		local rm1 = makeRoom1()
-		print(self:doesCollide(rm1, bigmap, {x=1, y=1}))
 		local rm2 = makeRoom2()
-		print(#rm1)
 		self:dumpMap(rm1, bigmap, {x=20, y=20} )
-		print(self:doesCollide(rm1, bigmap, {x=1, y=1}))
-		print(self:doesCollide(rm1, bigmap, {x=20, y=20}))
 		self:tryWeldRoomInMap(rm2, bigmap)
 		for i=1,4 do
 			local rand = love.math.random()
@@ -188,6 +179,31 @@ local MapGen = {
 	getRandomValidTile = function(self, map)
 		local tiles = self:getTilesOfKind(map, 2)
 		return tiles[love.math.random(#tiles)]
+	end,
+
+	getRandomNearbyValidTile = function(self, map, pos, min, max)
+		min = min or 700
+		max = max or 1000
+		local poss = pos
+		local teret = self:getRandomValidTileWithCondition(map, function(tile)
+			local dist = (Vector(tile.x * 128, tile.y * 128) - poss):len()
+			local ret = dist > min and dist < max
+			return ret
+		end)
+		return teret
+	end,
+
+	getRandomValidTileWithCondition = function(self, map, predicate)
+		local tiles = self:getTilesOfKind(map, 2)
+		local deftiles = {}
+		for k, v in pairs(tiles) do
+			if predicate(v) then
+				table.insert(deftiles, v)
+			end
+		end
+		local rand = love.math.random(#deftiles)
+		local ret = deftiles[rand]
+		return deftiles[rand]
 	end
 }
 

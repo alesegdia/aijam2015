@@ -96,6 +96,7 @@ local spawnZombieWithDirectController = function(x,y)
 end
 
 local swarm
+local swarms = {}
 local spawnZombieSwarm = function(x,y,howmany,teamid,spread)
 	local zombies = {}
 	spread = spread or 1000
@@ -111,6 +112,7 @@ local spawnZombieSwarm = function(x,y,howmany,teamid,spread)
 	for k,z in pairs(zombies) do
 		z.controller = z.ai.controller
 	end
+	return swarm
 end
 
 local map = MapGen:generate2(25,20)
@@ -189,7 +191,10 @@ function Game:enter()
 	local pos = MapGen:getRandomValidTile(map)
 	pos.x = pos.x + 0.5
 	pos.y = pos.y + 0.5
-	spawnZombieSwarm(pos.x * 128, pos.y * 128,30,"ZomboidTeam", 100)
+	pos = MapGen:getRandomNearbyValidTile(map, hero.pos)
+	--spawnZombieSwarm(pos.x * 128, pos.y * 128,30,"ZomboidTeam", 100)
+	table.insert(swarms, SpawnNearbySwarm())
+	table.insert(swarms, SpawnNearbySwarm())
 	Vision:init(stage, hero, false)
 	--[[
 	for i=1,100 do
@@ -198,12 +203,25 @@ function Game:enter()
 	]]--
 end
 
+function SpawnNearbySwarm()
+	local pos = MapGen:getRandomNearbyValidTile(map, hero.pos)
+	return spawnZombieSwarm(pos.x * 128, pos.y * 128,30,"ZomboidTeam", 100)
+end
 
 function Game:update( dt )
 	Vision:computeVision()
 	timer.update(dt)
 	stage:update(dt)
-	swarm:step()
+
+	for k,swarm in pairs(swarms) do
+		swarms[k]:step()
+		if swarms[k].dead then
+			--SpawnNearbySwarm()
+			swarms[k] = SpawnNearbySwarm()
+			swarms[k].dead = false
+		end
+	end
+
 	local x,y = hero.physicbody:getPosition()
 	cam:lookAt(x,y)
 	if gui.Button{text = "Go back"} then
