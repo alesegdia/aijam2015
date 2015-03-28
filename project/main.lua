@@ -75,7 +75,7 @@ theme:setLooping(true)
 
 -- Initialization
 function love.load(arg)
-	--theme:play()
+	theme:play()
 	math.randomseed(os.time())
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	-- love.mouse.setVisible(false)
