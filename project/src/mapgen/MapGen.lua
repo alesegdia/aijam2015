@@ -154,13 +154,13 @@ local MapGen = {
 		end
 	end,
 
-	generate2 = function(self, width, height)
+	generate2 = function(self, width, height, numRooms)
 		local bigmap = self.buildEmptyMap(128, 128)
 		local rm1 = makeRoom1()
 		local rm2 = makeRoom2()
 		self:dumpMap(rm1, bigmap, {x=20, y=20} )
 		self:tryWeldRoomInMap(rm2, bigmap)
-		for i=1,4 do
+		for i=1,numRooms do
 			local rand = love.math.random()
 			local room = nil
 			if rand < 0.3333 then

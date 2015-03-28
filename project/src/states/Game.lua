@@ -23,6 +23,8 @@ Game = Gamestate.new()
 
 local color = { 255, 255, 255, 0 }
 
+LEVEL = 1
+
 
 local center = {
   x = love.graphics.getWidth() / 2,
@@ -116,7 +118,7 @@ local spawnZombieSwarm = function(x,y,howmany,teamid,spread)
 	return swarm
 end
 
-local map = MapGen:generate2(25,20)
+local map
 local lastWallID = -1
 local buildMap = function()
 	for i=1,#map do
@@ -187,18 +189,42 @@ local aisliders = {
 	thurstSlider = { value = 250, min = 50, max = 500 }
 }
 
+haswon = false
+resethero = true
+local nextFloor = nil
 function Game:enter()
+	haswon = LEVEL == 5
+	if haswon then
+		haswon = false
+		resethero = true
+		LEVEL = 1
+		Gamestate.switch(WinScreen)
+	end
+	map = MapGen:generate2(25,20, LEVEL)
 	for k,v in pairs(stage.objects) do
 		v.dead = true
 	end
+	local herowasdead, herokills, herohealth
+	herowasdead = true
+	if hero ~= nil then
+		herowasdead = hero.dead
+		herokills = hero.kills
+		herohealth = hero.health
+	end
 	stage:reset()
-	local anim = newAnimation(Image.map8x, 1600, 1280, 1, 1)
 	--GameEntity(stage,0,0,anim,nil)
+	local nextpos = MapGen:getRandomValidTile(map)
+	local anim = newAnimation(Image.nextfloor, 48, 48, 1, 1)
+	nextFloor = GameEntity(stage, (nextpos.x+0.25) * 128, (nextpos.y+0.25)*128, anim, nil)
 	local heropos = MapGen:getRandomValidTile(map)
 	hero = Hero(stage,(heropos.x + 0.5) * 128,(heropos.y+0.5) * 128,world)
+	if not resethero then
+		print("presetin")
+		hero.kills = herokills
+		hero.health = herohealth
+	end
 	timer.add(2, tefunc)
 	--spawnBloodParticle(hero.pos.x, hero.pos.y, 1, 1)
-	anim:addFrame(0,0,1600,1280,1)
 	buildMap()
 	local pos = MapGen:getRandomValidTile(map)
 	pos.x = pos.x + 0.5
@@ -218,13 +244,23 @@ end
 
 function SpawnNearbySwarm()
 	local pos = MapGen:getRandomNearbyValidTile(map, hero.pos)
-	return spawnZombieSwarm(pos.x * 128, pos.y * 128,30,"ZomboidTeam", 100)
+	return spawnZombieSwarm(pos.x * 128, pos.y * 128,LEVEL*7,"ZomboidTeam", 100)
 end
 
 GUI_ENABLED = false
 
 function Game:update( dt )
+	if (hero.pos - nextFloor.pos):len() < 60 then
+		resethero = false
+		LEVEL = LEVEL + 1
+		if LEVEL > 4 then
+			level = 4
+		end
+		Gamestate.switch(Game)
+	end
 	if hero.health <= 0 then
+		resethero = true
+		LEVEL = 1
 		Gamestate.switch(DeadScreen)
 	end
 	Vision:computeVision()
@@ -359,6 +395,7 @@ function Game:draw()
   love.graphics.setColor({255,0,0,255})
   love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 10, 50)
   love.graphics.print("KILLS: "..tostring(hero.kills), 10, 100)
+  love.graphics.print("FLOOR: "..tostring(LEVEL), 10, 150)
   if GUI_ENABLED then
   love.graphics.print("Num walls detected by swarm: " ..tostring(swarm.numwalls), 10, 100)
   end

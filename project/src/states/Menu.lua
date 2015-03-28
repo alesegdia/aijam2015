@@ -49,7 +49,7 @@ function Menu:draw()
     --gui.core.draw()
     if love.mouse.isDown("l") and (keyframe == 1) then
     for k,v in pairs(rects) do
-		love.graphics.rectangle("line", v.r[1], v.r[2], v.r[3], v.r[4])
+		--love.graphics.rectangle("line", v.r[1], v.r[2], v.r[3], v.r[4])
 		if checkMouseInRect(v.r[1], v.r[2], v.r[3], v.r[4]) then
 			v.callback()
 		end
