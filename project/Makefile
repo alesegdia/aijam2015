@@ -10,7 +10,7 @@ distdir=../bin/
 windir=~/lovew64
 osxapp=/Applications/love.app/
 
-game=GAMENAME
+game=zomboids
 sources=main.lua src/**/*.lua libs/**/*.lua **/*.lua *.lua
 res=img/*.* music/*.* sfx/*.* # *.ttf
 
