@@ -56,7 +56,10 @@ Vision = {
 		local rayhit = { x=0,y=0,xn=0,yn=0,fix=nil }
 		--print("vx: " .. angle) -- base.x)
 		--print("vy: " .. base.y)
-		self.stage.physicworld.w:rayCast(base.x, base.y, base.x+v.x*2000,base.y+v.y*2000,self.RC_visionray(rayhit))
+		local rayend = Vector(base.x + v.x * 2000, base.y + v.y * 2000)
+		if rayend:len() > 0.001 then
+			self.stage.physicworld.w:rayCast(base.x, base.y, rayend.x, rayend.y, self.RC_visionray(rayhit))
+		end
 		return rayhit
 	end,
 
