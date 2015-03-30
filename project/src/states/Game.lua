@@ -244,7 +244,7 @@ end
 
 function SpawnNearbySwarm()
 	local pos = MapGen:getRandomNearbyValidTile(map, hero.pos)
-	return spawnZombieSwarm(pos.x * 128, pos.y * 128,LEVEL*7,"ZomboidTeam", 100)
+	return spawnZombieSwarm((pos.x+0.5) * 128, (pos.y+0.5) * 128,LEVEL*7,"ZomboidTeam", 100)
 end
 
 GUI_ENABLED = false
