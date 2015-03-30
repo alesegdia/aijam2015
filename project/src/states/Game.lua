@@ -349,8 +349,13 @@ function Game:draw()
 	local tilesize = 128
 	  love.graphics.setColor(0x9b,0xad,0xb7,255)
   	  love.graphics.rectangle("fill", 0, 0, #map * tilesize, #map[1] * tilesize)
-	  for i=1,#map do
-		  for j=1,#map[1] do
+  	  local xstart, ystart, xend, yend
+  	  xstart = math.floor(math.max(1,hero.pos.x/128 - 1))
+  	  ystart = math.floor(math.max(1,hero.pos.y/128 - 1))
+  	  xend =   math.floor(math.min(#map, hero.pos.x/128 + 1))
+  	  yend =   math.floor(math.min(#map, hero.pos.y/128 + 1))
+	  for i=xstart,xend do
+		  for j=ystart,yend do
 			  if map[i][j] == 1 then
 				  --love.graphics.setColor(0x3f,0x3f,0x74,255)
 				  love.graphics.setColor(0,0,0,255)
