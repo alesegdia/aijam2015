@@ -162,13 +162,13 @@ PhysicWorld = Class {
 
   createPlayer = function( self, x, y )
 	  local phb = love.physics.newBody( self.w, x, y, "dynamic" )
-	  local s = love.physics.newCircleShape(-2,-33,10)
+	  local s = love.physics.newCircleShape(0,10,10)
 	  local f = love.physics.newFixture( phb, s, 0 )
 	  f:setFriction(0)
-	  s = love.physics.newCircleShape(-2,-13,10)
+	  s = love.physics.newCircleShape(0,-10,10)
 	  f = love.physics.newFixture( phb, s, 0 )
 	  f:setFriction(0)
-	  s = love.physics.newRectangleShape(-2,-20,20,18)
+	  s = love.physics.newRectangleShape(0,0,20,18)
 	  f = love.physics.newFixture( phb, s, 0)
 	  f:setFriction(0)
 	  return phb

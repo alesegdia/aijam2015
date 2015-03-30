@@ -97,9 +97,9 @@ Hero = Class {
 	  local mx, _ = love.mouse.getPosition()
 	  print(mx)
 	  if mx < 500 then
-	  	  love.graphics.draw(Image.hero_sheet_4x, self.leftq, self.pos.x, self.pos.y)
+	  	  love.graphics.draw(Image.hero_sheet_4x, self.leftq, self.pos.x, self.pos.y, 0, 1, 1, Image.hero_sheet_4x:getWidth()/4, Image.hero_sheet_4x:getHeight()/2)
 	  else
-	  	  love.graphics.draw(Image.hero_sheet_4x, self.rightq, self.pos.x, self.pos.y)
+	  	  love.graphics.draw(Image.hero_sheet_4x, self.rightq, self.pos.x, self.pos.y, 0, 1, 1, Image.hero_sheet_4x:getWidth()/4, Image.hero_sheet_4x:getHeight()/2)
 	  end
 	  GameEntity.draw(self)
 	  love.graphics.setColor(255,255,255,255)

@@ -47,7 +47,7 @@ Vision = {
 		end
 	end,
 
-	tmpvec = Vector(0,-30),
+	tmpvec = Vector(0,0),
 
 	Raycast = function( self, dir, angle )
 		angle = angle or 0
