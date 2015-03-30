@@ -95,7 +95,6 @@ Hero = Class {
 	  if self.isHurting > 255 then self.isHurting = 255 end
 	  love.graphics.setColor(255,self.isHurting,self.isHurting,255)
 	  local mx, _ = love.mouse.getPosition()
-	  print(mx)
 	  if mx < 500 then
 	  	  love.graphics.draw(Image.hero_sheet_4x, self.leftq, self.pos.x, self.pos.y, 0, 1, 1, Image.hero_sheet_4x:getWidth()/4, Image.hero_sheet_4x:getHeight()/2)
 	  else
