@@ -8,17 +8,15 @@ require (LIBRARYPATH.."AnAL")
 
 Zombie = Class {
   init = function(self, stage, x, y, controller)
-	local anim = newAnimation(Image.zombie_sheet_4x,40,48,1,1)
-	anim:addFrame(0,0,40,48,1)
 	local phb = stage.physicworld:createZombie(x, y)
 	phb:setSleepingAllowed(false)
-  	self = GameEntity.init( self, stage, x, y, anim, phb )
+  	self = GameEntity.init( self, stage, x, y, nil, phb )
   	self.controller = controller or function(self) print("im dumb heh") end
   	self.entitytype = "zombie"
   	self.health = 10
   	phb:setUserData(self)
-	self.rightq = love.graphics.newQuad( 0, 0, 44, 88, Image.zombie_sheet_4x:getDimensions())
-	self.leftq = love.graphics.newQuad( 40, 0, 40, 88, Image.zombie_sheet_4x:getDimensions())
+	self.rightq = love.graphics.newQuad( 0, 0, 40, 48, Image.zombie_sheet_4x:getDimensions())
+	self.leftq = love.graphics.newQuad( 40, 0, 40, 48, Image.zombie_sheet_4x:getDimensions())
   	return self
   end,
 
