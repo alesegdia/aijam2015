@@ -8,10 +8,8 @@ require (LIBRARYPATH.."AnAL")
 
 Hero = Class {
   init = function(self, stage, x, y, world)
-	local anim = newAnimation(Image.hero_sheet_4x,44,88,1,1)
-	anim:addFrame(0,0,44,88,1)
 	local phb = world:createPlayer(x, y)
-  	self = GameEntity.init( self, stage, x, y, anim, phb )
+  	self = GameEntity.init( self, stage, x, y, nil, phb )
   	self.shootRate = 0.2
   	self.nextShoot = love.timer.getTime() + self.shootRate
   	self.entitytype = "hero"
@@ -21,6 +19,8 @@ Hero = Class {
 	self.lastBoingFinished = true
 	self.isHurting = 255
 	self.kills = 0
+	self.rightq = love.graphics.newQuad( 0, 0, 44, 88, Image.hero_sheet_4x:getDimensions())
+	self.leftq = love.graphics.newQuad( 44, 0, 44, 88, Image.hero_sheet_4x:getDimensions())
   	return self
   end,
   input = {
@@ -82,18 +82,25 @@ Hero = Class {
 		self:shoot(vec.x * speed, vec.y * speed)
 	end
 
-  	  if self.isHurting < 255 then
-  	  	  self.isHurting = self.isHurting+5
-	  end
+	if self.isHurting < 255 then
+		self.isHurting = self.isHurting+5
+	end
 	GameEntity.update(self,dt)
 	self.pos.x = self.pos.x + self.deltaboing.x
 	self.pos.y = self.pos.y + self.deltaboing.y
   end,
 
   draw = function(self)
-  	  if self.isHurting < 0 then self.isHurting = 0 end
-  	  if self.isHurting > 255 then self.isHurting = 255 end
-		love.graphics.setColor(255,self.isHurting,self.isHurting,255)
+	  if self.isHurting < 0 then self.isHurting = 0 end
+	  if self.isHurting > 255 then self.isHurting = 255 end
+	  love.graphics.setColor(255,self.isHurting,self.isHurting,255)
+	  local mx, _ = love.mouse.getPosition()
+	  print(mx)
+	  if mx < 500 then
+	  	  love.graphics.draw(Image.hero_sheet_4x, self.leftq, self.pos.x, self.pos.y)
+	  else
+	  	  love.graphics.draw(Image.hero_sheet_4x, self.rightq, self.pos.x, self.pos.y)
+	  end
 	  GameEntity.draw(self)
 	  love.graphics.setColor(255,255,255,255)
   end,
