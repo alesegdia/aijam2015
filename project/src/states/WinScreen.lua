@@ -25,6 +25,8 @@ local rects = {}
 local canContinue = false
 local alfa = { value=0 }
 function WinScreen:enter()
+	print(alfa.value)
+	canContinue = false
 	timer.tween(5, alfa, {value = 255}, 'quad', function() canContinue = true end)
 end
 

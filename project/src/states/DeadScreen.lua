@@ -25,6 +25,8 @@ local rects = {}
 local canContinue = false
 local alfa = { value=0 }
 function DeadScreen:enter()
+	canContinue = false
+	alfa.value = 0
 	timer.tween(5, alfa, {value = 255}, 'quad', function() canContinue = true end)
 end
 
