@@ -12,7 +12,7 @@ Vision = {
 	end,
 	computeVision = function(self)
 		local vision = {}
-		for i=1,360,5 do
+		for i=1,360,1 do
 			local obj = self:Raycast(Vector(0,1), math.rad(i))
 			table.insert(vision, obj)
 		end
