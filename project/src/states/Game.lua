@@ -254,7 +254,7 @@ function Game:update( dt )
 		resethero = false
 		LEVEL = LEVEL + 1
 		if LEVEL > 4 then
-			level = 4
+			LEVEL = 4
 		end
 		Gamestate.switch(Game)
 	end
